@@ -106,16 +106,16 @@
         }
         .room-code-container {
             display: flex; align-items: center; justify-content: center; gap: 10px;
-            background: #f1f2f6; padding: 10px; border-radius: 15px; margin: 10px 0;
+            background: #f1f2f6; padding: 15px; border-radius: 15px; margin: 10px 0;
             border: 2px dashed #b2bec3; cursor: pointer;
         }
         .room-code-display {
-            font-size: 2.5rem; font-weight: 900; color: var(--primary); letter-spacing: 5px;
+            font-size: 3rem; font-weight: 900; color: var(--primary); letter-spacing: 5px;
         }
         .share-btn {
-            background: white; border: none; width: 40px; height: 40px; border-radius: 50%;
+            background: white; border: none; width: 50px; height: 50px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center; cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-size: 1.2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-size: 1.5rem;
         }
         
         .player-card {
@@ -239,6 +239,28 @@
         }
         .btn-submit:active { transform: translateY(4px); box-shadow: 0 2px 0 #009476; }
 
+        /* Reaction Bar */
+        .reaction-bar {
+            display: flex; gap: 10px; margin-top: 10px; justify-content: center;
+            width: 100%; max-width: 400px;
+        }
+        .reaction-btn {
+            background: white; border: 2px solid var(--light); border-radius: 12px;
+            width: 45px; height: 45px; font-size: 1.5rem; cursor: pointer;
+            transition: 0.2s; display: flex; align-items: center; justify-content: center;
+        }
+        .reaction-btn:active { transform: scale(0.9); }
+
+        .floating-emoji {
+            position: absolute; font-size: 4rem; pointer-events: none; z-index: 100;
+            animation: floatUp 2s forwards; left: 50%; top: 50%;
+        }
+        @keyframes floatUp {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -150%) scale(1); }
+        }
+
         /* Effects */
         .overlay-msg {
             position: fixed; top: 60%; left: 50%; transform: translate(-50%, -50%);
@@ -273,15 +295,6 @@
             font-size: 8rem; font-weight: 900; color: var(--primary);
         }
 
-        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap:10px; margin: 20px 0; }
-        .intro-feat { background: #f1f2f6; padding: 15px; border-radius: 15px; text-align: center; font-size: 0.9rem; }
-        .intro-icon { font-size: 2rem; display: block; margin-bottom: 5px; }
-        
-        .edu-tip {
-            background: #fff3e0; border: 2px dashed #ffe0b2; padding: 10px; border-radius: 15px;
-            font-size: 0.85rem; color: #e67e22; margin-top: 15px; text-align: left;
-        }
-
         .result-score { font-size: 4rem; font-weight: 900; color: var(--primary); margin: 10px 0; z-index: 10; position: relative; }
         
         @keyframes bounce { from { transform: rotate(10deg) scale(1); } to { transform: rotate(10deg) scale(1.1); } }
@@ -295,6 +308,7 @@
             .question-text { font-size: 2.2rem; }
             .btn-submit { height: 55px; font-size: 1.5rem; }
             .setup-btn { font-size: 0.8rem; padding: 8px; }
+            .room-code-display { font-size: 2rem; }
         }
     </style>
 </head>
@@ -346,7 +360,6 @@
             <button class="setup-btn active" onclick="setMode('time', this)">⏱️ 60sn</button>
             <button class="setup-btn" onclick="setMode('count', this)">📝 20 Soru</button>
             <button class="setup-btn" onclick="setMode('survival', this)">🔥 Zamana Karşı</button>
-            <!-- Versus Removed -->
             <button class="setup-btn" style="background:#0984e3; color:white; border-color:#0984e3;" onclick="setMode('online', this)">🌍 Online Düello</button>
         </div>
         
@@ -413,7 +426,7 @@
         </div>
 
         <button id="ready-btn" class="big-start-btn" style="background:var(--light); color:var(--dark);" onclick="toggleReady()">HAZIR DEĞİLİM</button>
-        <button class="big-start-btn secondary-btn" style="margin-top:10px; background:white; color:var(--danger);" onclick="quitGame()">ÇIK</button>
+        <button class="big-start-btn secondary-btn" style="margin-top:10px; background:white; color:var(--danger);" onclick="leaveLobby()">ÇIK</button>
     </div>
 </div>
 
@@ -548,6 +561,13 @@
             </button>
         </div>
         
+        <div id="reaction-area" class="reaction-bar hidden">
+            <button class="reaction-btn" onclick="sendReaction('😂')">😂</button>
+            <button class="reaction-btn" onclick="sendReaction('😎')">😎</button>
+            <button class="reaction-btn" onclick="sendReaction('😭')">😭</button>
+            <button class="reaction-btn" onclick="sendReaction('😡')">😡</button>
+        </div>
+
         <div class="submit-area">
             <button class="btn-submit" onclick="checkAnswer()">CEVAPLA</button>
         </div>
@@ -641,7 +661,8 @@
         identity: { name: '', avatar: '😎' },
         // Online Mode
         isOnline: false, roomCode: null, playerId: null, opponentScore: 0,
-        opponentName: 'Rakip', opponentAvatar: '👤', isReady: false, opponentReady: false
+        opponentName: 'Rakip', opponentAvatar: '👤', isReady: false, opponentReady: false,
+        hasJoinedAudio: false
     };
     let timerInterval;
     let stats = JSON.parse(localStorage.getItem('mathStats')) || { games: 0, best: 0, correct: 0, wrong: 0, totalSeconds: 0 };
@@ -651,11 +672,10 @@
     if(savedId) {
         state.identity = JSON.parse(savedId);
         document.getElementById('display-player-name').textContent = state.identity.name;
-        document.getElementById('identity-screen').classList.add('hidden'); // Fixed: changed intro-screen to identity-screen
+        document.getElementById('identity-screen').classList.add('hidden'); 
         document.getElementById('setup-screen').classList.remove('hidden');
     } else {
-        // First run or cleared
-        document.getElementById('identity-screen').classList.remove('hidden'); // Fixed: changed intro-screen to identity-screen
+        document.getElementById('identity-screen').classList.remove('hidden');
     }
 
     // --- SOUND ---
@@ -695,6 +715,10 @@
              osc.frequency.exponentialRampToValueAtTime(800, now + 0.3);
              gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.3);
              osc.start(now); osc.stop(now + 0.3);
+        } else if (type === 'join') {
+             osc.type = 'sine'; osc.frequency.setValueAtTime(400, now);
+             gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.2);
+             osc.start(now); osc.stop(now + 0.2);
         }
     }
 
@@ -847,7 +871,7 @@
         onValue(ref(db, 'rooms/' + code), (snapshot) => {
             const data = snapshot.val();
             if(!data) {
-                if(state.isOnline && state.active) return; // Keep game running if active? No, room deleted
+                if(state.isOnline && state.active) return; 
                 alert("Oda kapatıldı!"); window.goHome(); return;
             }
 
@@ -855,13 +879,21 @@
             updatePlayerCard('p1', data.players?.p1);
             updatePlayerCard('p2', data.players?.p2);
 
+            // HOST LOGIC TO START GAME
+            if (state.playerId === 'p1' && data.status === 'waiting') {
+                if (data.players?.p1?.ready && data.players?.p2?.ready) {
+                     // Both ready, start game
+                     update(ref(db, 'rooms/' + code), { status: 'playing' });
+                     generateOnlineQuestion();
+                }
+            }
+
             // Sync Game Start
             if(data.status === 'playing' && !state.active) {
-                 // SYNC START
                  startOnlineGame(data);
             }
 
-            // Sync Game Data (Score & Q)
+            // Sync Game Data (Score & Q & Reactions)
             if(state.active) {
                 // Scores
                 const p1s = data.players.p1?.score || 0;
@@ -875,7 +907,6 @@
 
                 // Question Change
                 if(data.currentQuestion && data.currentQuestion.text !== state.currentQ.text) {
-                     // NEW QUESTION ARRIVED
                      state.currentQ = data.currentQuestion;
                      document.getElementById('q-text').textContent = state.currentQ.text;
                      document.getElementById('q-text').style.color = 'white';
@@ -884,12 +915,20 @@
                      document.getElementById('numpad-area').classList.remove('frozen-pad');
                      document.getElementById('q-container').classList.remove('shake');
                      
-                     // Did opponent solve it?
                      if(data.lastAnswerBy && data.lastAnswerBy !== state.playerId) {
                          showFeedback(`${state.opponentName} BİLDİ! 🚀`, 'warn');
                          document.getElementById('game-area').classList.add('shake');
                          setTimeout(()=>document.getElementById('game-area').classList.remove('shake'), 300);
+                         playSound('wrong'); // Opponent answered, sound feedback
                      }
+                }
+
+                // Reactions (Emojis)
+                const reaction = data.reaction;
+                if(reaction && reaction.from !== state.playerId && reaction.ts !== state.lastReactionTs) {
+                    state.lastReactionTs = reaction.ts;
+                    showFloatingEmoji(reaction.emoji);
+                    playSound('join');
                 }
             }
             
@@ -899,9 +938,7 @@
                 const p2R = data.players.p2?.rematch;
                 
                 if(p1R && p2R) {
-                    // Both agreed
                     if(state.playerId === 'p1') {
-                        // Host resets
                         update(ref(db, 'rooms/' + code), {
                             status: 'playing',
                             'players/p1/score': 0, 'players/p1/rematch': null,
@@ -937,6 +974,9 @@
             if(pData.ready) {
                 elStatus.innerHTML = '<span class="ready-badge">HAZIR</span>';
                 card.classList.add('ready');
+                if(!state.hasJoinedAudio && pid !== state.playerId && state.roomCode) {
+                     playSound('join'); state.hasJoinedAudio = true; // Simple sound check
+                }
             } else {
                 elStatus.textContent = 'Bekliyor...';
                 card.classList.remove('ready');
@@ -970,20 +1010,22 @@
         update(ref(db, 'rooms/' + state.roomCode + '/players/' + state.playerId), {
             ready: state.isReady
         });
-
-        // Host checks if start possible
-        // Actually, trigger via Cloud Function or Host Logic? Host Logic is simpler here.
-        if(state.playerId === 'p1') {
-             // Check self and opponent manually via snapshot or wait for listener
-             get(ref(db, 'rooms/' + state.roomCode + '/players')).then(snap => {
-                 const pl = snap.val();
-                 if(pl.p1?.ready && pl.p2?.ready) {
-                     // START GAME
-                     update(ref(db, 'rooms/' + state.roomCode), { status: 'playing' });
-                     generateOnlineQuestion();
-                 }
-             });
+    };
+    
+    // --- LOBBY EXIT ---
+    window.leaveLobby = function() {
+        if(state.roomCode && state.playerId) {
+             // Clean disconnect
+             update(ref(db, 'rooms/' + state.roomCode + '/players/' + state.playerId), null);
+             if (state.playerId === 'p1') {
+                 // Host closes room
+                 remove(ref(db, 'rooms/' + state.roomCode));
+             }
         }
+        state.isOnline = false;
+        state.roomCode = null;
+        state.playerId = null;
+        window.goHome();
     };
 
     window.shareRoomCode = function() {
@@ -996,14 +1038,15 @@
 
     function startOnlineGame(data) {
         // Setup UI
-        switchScreen('ready-room', 'result-screen'); // Hack to clear
-        document.getElementById('result-screen').classList.add('hidden'); // Ensure hidden
+        switchScreen('ready-room', 'result-screen'); 
+        document.getElementById('result-screen').classList.add('hidden'); 
         
         // Populate Header
         document.getElementById('my-avatar').textContent = state.identity.avatar;
         document.getElementById('opp-avatar').textContent = state.opponentAvatar;
         document.getElementById('online-info').classList.remove('hidden');
         document.getElementById('solo-info').classList.add('hidden');
+        document.getElementById('reaction-area').classList.remove('hidden');
 
         // Start Countdown
         const countEl = document.getElementById('countdown-overlay');
@@ -1061,6 +1104,25 @@
         });
     }
 
+    // --- REACTIONS ---
+    window.sendReaction = function(emoji) {
+         if(!state.active || !state.isOnline) return;
+         update(ref(db, 'rooms/' + state.roomCode + '/reaction'), {
+             emoji: emoji,
+             from: state.playerId,
+             ts: Date.now()
+         });
+         showFloatingEmoji(emoji);
+    };
+
+    function showFloatingEmoji(emoji) {
+        const el = document.createElement('div');
+        el.className = 'floating-emoji';
+        el.textContent = emoji;
+        document.getElementById('game-area').appendChild(el);
+        setTimeout(() => el.remove(), 2000);
+    }
+
     // --- GAME LOGIC (SHARED) ---
 
     window.prepareGame = function(fromId = 'setup-screen') {
@@ -1095,6 +1157,7 @@
         document.getElementById('game-screen').classList.remove('hidden');
         document.getElementById('online-info').classList.add('hidden');
         document.getElementById('solo-info').classList.remove('hidden');
+        document.getElementById('reaction-area').classList.add('hidden');
         
         let modeIcon = '⏱️';
         if(config.mode === 'survival') modeIcon = '🔥';
@@ -1193,7 +1256,7 @@
             playSound('pass'); state.passes--; state.streak = 0; updatePasUI();
             if(config.mode === 'online') {
                  showFeedback("PAS GEÇTİN", "warn");
-                 generateOnlineQuestion(); // Penalty: opponent gets new question too? Or just skip locally? For fair sync, must gen new for both.
+                 generateOnlineQuestion(); 
             } else {
                  window.nextQuestion();
                  showFeedback("PAS GEÇTİN", "warn");
@@ -1434,7 +1497,6 @@
         "Bal petekleri altıgen şeklindedir çünkü en az balmumu ile en çok balı saklamanın yolu budur.",
         "9 ile çarpılan her sayının rakamları toplamı 9'un katıdır."
     ];
-    // document.getElementById('daily-fact').textContent = facts[Math.floor(Math.random() * facts.length)]; // Removed intro screen element reference
 </script>
 </body>
 </html>
