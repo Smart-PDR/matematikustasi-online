@@ -1,0 +1,1364 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+    <title>Matematik Ustası | Online Düello</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-start: #fdfbf7;
+            --primary: #6c5ce7;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --dark: #2d3436;
+            --light: #dfe6e9;
+            --success: #00b894;
+            --danger: #d63031;
+            --gold: #fab1a0;
+            --warn: #ffeaa7;
+            --pas-color: #e17055;
+            --ice: #74b9ff;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-start);
+            color: var(--dark);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: background 1s ease;
+        }
+
+        /* DEVICE MODES CSS VARIABLES */
+        body.mode-phone { --btn-size: 55px; --font-base: 16px; --numpad-gap: 8px; }
+        body.mode-tablet { --btn-size: 75px; --font-base: 20px; --numpad-gap: 12px; }
+        body.mode-board { --btn-size: 100px; --font-base: 28px; --numpad-gap: 20px; }
+
+        /* Sami G. Signature */
+        .sami-g-signature {
+            position: fixed; bottom: 15px; right: 20px;
+            font-size: 0.8rem; color: rgba(0,0,0,0.3);
+            z-index: 9999; pointer-events: none; text-align: right; line-height: 1.2;
+            font-family: 'Poppins', sans-serif;
+        }
+        .sami-g-signature strong { font-size: 1rem; color: rgba(0,0,0,0.5); font-weight: 800; }
+
+        /* Sound Toggle Button */
+        .sound-toggle {
+            position: fixed; top: 15px; right: 15px;
+            background: white; border: 2px solid var(--light); border-radius: 50%;
+            width: 40px; height: 40px; display: flex; justify-content: center; align-items: center;
+            font-size: 1.2rem; cursor: pointer; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: 0.2s;
+        }
+        .sound-toggle:active { transform: scale(0.9); }
+
+        /* Screens & Transitions */
+        .screen {
+            position: fixed; inset: 0; background: white; z-index: 10;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; overflow-y: auto; 
+            opacity: 1; transition: opacity 0.4s ease-in-out;
+        }
+        .hidden { display: none !important; opacity: 0; pointer-events: none; }
+        .fade-out { opacity: 0; pointer-events: none; }
+
+        /* Setup Screen & Cards */
+        .setup-card {
+            background: #fff; padding: 25px; border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1); width: 100%; max-width: 600px; text-align: center;
+            border: 4px solid var(--light);
+            max-height: 95vh; overflow-y: auto; position: relative;
+        }
+        .title { font-size: 2.2rem; font-weight: 900; color: var(--primary); margin-bottom: 10px; letter-spacing: -1px; }
+        
+        .section-label { font-weight: 700; color: #b2bec3; display: block; margin: 12px 0 6px; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; }
+        
+        .btn-group { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+        .setup-btn {
+            flex: 1; min-width: 70px; padding: 10px; border: 2px solid var(--light);
+            background: white; border-radius: 12px; font-weight: 700; cursor: pointer;
+            transition: 0.2s; font-family: inherit; color: var(--dark); font-size: 0.9rem;
+        }
+        .setup-btn.active { background: var(--primary); color: white; border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3); }
+
+        .big-start-btn {
+            width: 100%; padding: 18px; background: var(--success); color: white;
+            border: none; border-radius: 18px; font-size: 1.4rem; font-weight: 800;
+            margin-top: 20px; cursor: pointer; box-shadow: 0 6px 0 #00a884; transition: 0.1s;
+        }
+        .big-start-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #00a884; }
+
+        .secondary-btn {
+            background: var(--light); color: var(--dark); box-shadow: 0 6px 0 #b2bec3;
+        }
+        .secondary-btn:active { box-shadow: 0 2px 0 #b2bec3; }
+
+        /* Online Mode UI */
+        .online-lobby {
+            display: flex; flex-direction: column; gap: 10px; margin-top: 15px; width: 100%;
+        }
+        .room-code-input {
+            width: 100%; padding: 15px; font-size: 1.5rem; text-align: center; letter-spacing: 5px;
+            border: 2px solid var(--light); border-radius: 15px; font-weight: 800; color: var(--dark);
+        }
+        .room-code-display {
+            font-size: 3rem; font-weight: 900; color: var(--primary); letter-spacing: 10px; margin: 10px 0;
+        }
+        .lobby-status {
+            font-size: 1rem; color: #636e72; margin-bottom: 15px; animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+
+        /* Mode Explanation Toast */
+        .mode-toast {
+            background: var(--dark); color: white; padding: 8px 16px; border-radius: 20px;
+            font-size: 0.85rem; margin-top: 10px; opacity: 0; transition: opacity 0.3s;
+            position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 400px; pointer-events: none; z-index: 20;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .mode-toast.show { opacity: 1; }
+        
+        /* Versus Names Input */
+        .versus-inputs {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;
+            animation: fadeIn 0.3s ease;
+        }
+        .name-input {
+            width: 100%; padding: 10px; border: 2px solid var(--light); border-radius: 12px;
+            font-family: inherit; font-size: 1rem; text-align: center;
+        }
+        .name-input:focus { outline: none; border-color: var(--primary); }
+
+        /* Stats Bar (Top) */
+        #game-header {
+            display: grid; grid-template-columns: auto 1fr auto; gap: 15px; align-items: center;
+            padding: 10px 15px; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(0,0,0,0.05); height: 80px; width: 100%; z-index: 5;
+        }
+        .header-controls { display: flex; gap: 10px; }
+        
+        /* Modern Icon Buttons */
+        .modern-icon-btn { 
+            width: 45px; height: 45px; border-radius: 15px; border: none; font-size: 1.2rem; 
+            cursor: pointer; background: white; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 0 var(--light); color: var(--dark); transition: 0.1s; border: 1px solid var(--light);
+        }
+        .modern-icon-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--light); }
+        .modern-icon-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+        .progress-container {
+            width: 100%; display: flex; flex-direction: column; align-items: center;
+        }
+        .progress-track {
+            width: 100%; max-width: 300px; height: 12px; background: #dfe6e9; 
+            border-radius: 10px; overflow: hidden; position: relative;
+        }
+        .progress-fill {
+            height: 100%; background: linear-gradient(90deg, var(--secondary), var(--primary)); 
+            width: 0%; transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .level-badge { font-size: 0.75rem; font-weight: 800; color: var(--primary); margin-bottom: 2px; }
+
+        .score-box { 
+            background: var(--primary); color: white; padding: 5px 15px; border-radius: 10px; 
+            font-weight: 800; font-size: 1.2rem; min-width: 60px; text-align: center;
+        }
+
+        /* Main Game Area */
+        #game-area {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            width: 100%; max-width: 800px; margin: 0 auto; padding: 10px; position: relative;
+        }
+
+        /* Question Bubble */
+        .question-container {
+            background: var(--dark); color: white; padding: 15px 30px; border-radius: 30px;
+            margin-bottom: 15px; text-align: center; position: relative;
+            box-shadow: 0 15px 40px rgba(45, 52, 54, 0.3);
+            transform: scale(1); transition: transform 0.2s;
+            width: 90%; max-width: 500px;
+        }
+        .question-text { font-size: 3rem; font-weight: 800; letter-spacing: 2px; line-height: 1.2; }
+        
+        .answer-preview {
+            height: 50px; margin-top: 10px; background: rgba(255,255,255,0.15);
+            border-radius: 15px; display: flex; align-items: center; justify-content: center;
+            font-size: 2.2rem; font-weight: 700; color: #81ecec; border: 2px dashed rgba(255,255,255,0.3);
+        }
+
+        /* Streak Counter */
+        .streak-container {
+            position: absolute; top: -15px; right: -5px; background: var(--accent);
+            color: white; padding: 4px 12px; border-radius: 20px; font-weight: 800;
+            font-size: 0.8rem; transform: rotate(10deg); opacity: 0; transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(253, 121, 168, 0.4); pointer-events: none;
+        }
+        .streak-active { opacity: 1; animation: bounce 0.5s infinite alternate; }
+
+        /* Numpad */
+        .numpad {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: var(--numpad-gap); width: 100%; max-width: 450px;
+            transition: 0.3s;
+        }
+        
+        /* Frozen State for Numpad ONLY */
+        .numpad.frozen-pad {
+            opacity: 0.4;
+            filter: grayscale(1);
+            pointer-events: none;
+            transform: scale(0.98);
+        }
+
+        .btn {
+            height: var(--btn-size); border: none; border-radius: 18px;
+            font-size: calc(var(--font-base) * 1.5); font-weight: 700; cursor: pointer;
+            background: white; color: var(--dark); box-shadow: 0 5px 0 var(--light);
+            transition: 0.1s; display: flex; align-items: center; justify-content: center;
+        }
+        .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--light); background: #f1f2f6; }
+        
+        .btn-del { background: var(--danger); color: white; box-shadow: 0 5px 0 #c0392b; font-size: 1rem; font-weight: 800; letter-spacing: 1px; }
+        .btn-del:active { box-shadow: 0 2px 0 #c0392b; }
+
+        .btn-pas { background: var(--pas-color); color: white; box-shadow: 0 5px 0 #bf5e46; font-size: 1rem; flex-direction: column; line-height: 1; gap: 4px; }
+        .btn-pas:active { box-shadow: 0 2px 0 #bf5e46; }
+        .pas-dots { display: flex; gap: 3px; }
+        .pas-dot { width: 6px; height: 6px; background: rgba(255,255,255,0.4); border-radius: 50%; }
+        .pas-dot.active { background: white; }
+
+        /* Submit Button */
+        .submit-area { width: 100%; max-width: 450px; display: grid; grid-template-columns: 1fr; margin-top: 15px; }
+        .btn-submit { 
+            background: var(--success); color: white; height: 65px; border-radius: 20px;
+            font-size: 1.8rem; font-weight: 800; border: none; box-shadow: 0 6px 0 #009476; cursor: pointer;
+        }
+        .btn-submit:active { transform: translateY(4px); box-shadow: 0 2px 0 #009476; }
+
+        /* Effects */
+        .overlay-msg {
+            position: fixed; top: 60%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 3.5rem; font-weight: 900; color: var(--success); text-shadow: 0 5px 20px rgba(255,255,255,0.2);
+            z-index: 100; pointer-events: none; opacity: 0; background: rgba(255,255,255,0.4);
+            padding: 10px 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); white-space: nowrap;
+        }
+        .fade-up { animation: fadeUp 1s forwards; }
+        @keyframes fadeUp { 0% { opacity: 0; transform: translate(-50%, -20%) scale(0.8); } 20% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.1); } 80% { opacity: 0.9; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -80%); } }
+
+        /* Timer Blinking Effects */
+        @keyframes blinkAnim { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        .blink-slow { animation: blinkAnim 1s infinite; color: var(--danger) !important; }
+        .blink-fast { animation: blinkAnim 0.3s infinite; color: var(--danger) !important; font-weight: 900; transform: scale(1.1); }
+
+        /* Timer Container Size */
+        .timer-container {
+             font-size: 1.2rem;
+             transition: 0.3s;
+             padding: 5px 10px;
+             border-radius: 10px;
+        }
+
+        /* Stats Screen */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; margin-top: 20px; }
+        .stat-card { background: #f8f9fa; padding: 15px; border-radius: 15px; border: 2px solid #eee; text-align: center; display:flex; flex-direction:column; justify-content:center; align-items:center; }
+        .stat-card h3 { font-size: 0.8rem; color: #b2bec3; margin-bottom: 5px; text-transform: uppercase; }
+        .stat-card p { font-size: 1.5rem; font-weight: 800; color: var(--dark); margin: 0; }
+        .stat-icon { font-size: 1.5rem; margin-bottom: 5px; display:block; }
+
+        /* Modal (Pause / Ready) */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+            z-index: 2000; display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Countdown Overlay */
+        #countdown-overlay {
+            position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 3000;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 8rem; font-weight: 900; color: var(--primary);
+        }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Intro Screen Features */
+        .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap:10px; margin: 20px 0; }
+        .intro-feat { background: #f1f2f6; padding: 15px; border-radius: 15px; text-align: center; font-size: 0.9rem; }
+        .intro-icon { font-size: 2rem; display: block; margin-bottom: 5px; }
+        
+        /* Educational Tip */
+        .edu-tip {
+            background: #fff3e0; border: 2px dashed #ffe0b2; padding: 10px; border-radius: 15px;
+            font-size: 0.85rem; color: #e67e22; margin-top: 15px; text-align: left;
+        }
+
+        /* Result Screen */
+        .result-score { font-size: 4rem; font-weight: 900; color: var(--primary); margin: 10px 0; z-index: 10; position: relative; }
+        
+        @keyframes bounce { from { transform: rotate(10deg) scale(1); } to { transform: rotate(10deg) scale(1.1); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        .shake { animation: shake 0.3s; }
+        .pop { animation: pop 0.2s; }
+        @keyframes pop { 50% { transform: scale(1.05); } }
+
+        @media (max-width: 500px) {
+            .title { font-size: 1.8rem; }
+            .question-text { font-size: 2.2rem; }
+            .btn-submit { height: 55px; font-size: 1.5rem; }
+            .setup-btn { font-size: 0.8rem; padding: 8px; }
+        }
+    </style>
+</head>
+<body class="mode-tablet">
+
+<!-- Signature -->
+<div class="sami-g-signature">This is a<br><strong>Sami G.</strong><br>production.</div>
+
+<button class="sound-toggle" onclick="toggleSound()" title="Ses Aç/Kapat">
+    <span id="sound-icon">🔊</span>
+</button>
+
+<!-- INTRO SCREEN (FIRST LOAD) -->
+<div id="intro-screen" class="screen">
+    <div class="setup-card">
+        <div style="font-size: 3rem; margin-bottom: 10px;">🎓</div>
+        <h1 class="title">Hoş Geldin!</h1>
+        <p style="color: #636e72; margin-bottom: 15px; font-size: 1.1rem; line-height: 1.5;">
+            Matematik Ustası ile eğlenerek öğrenmeye hazır mısın?
+        </p>
+        
+        <div class="intro-features">
+            <div class="intro-feat">
+                <span class="intro-icon">🚀</span>
+                <strong>Hızlan</strong>
+            </div>
+            <div class="intro-feat">
+                <span class="intro-icon">⭐</span>
+                <strong>Yüksel</strong>
+            </div>
+            <div class="intro-feat">
+                <span class="intro-icon">🧊</span>
+                <strong>Donma!</strong>
+            </div>
+            <div class="intro-feat">
+                <span class="intro-icon">🏆</span>
+                <strong>Kazan</strong>
+            </div>
+        </div>
+
+        <div class="edu-tip">
+            <strong>💡 Günün Bilgisi:</strong> <span id="daily-fact">Sıfır rakamı tarihte ilk kez Hindistan'da kullanılmıştır!</span>
+        </div>
+
+        <button class="big-start-btn" onclick="switchScreen('intro-screen', 'setup-screen')">BAŞLAYALIM!</button>
+    </div>
+</div>
+
+<!-- SETUP SCREEN -->
+<div id="setup-screen" class="screen hidden">
+    <div class="setup-card">
+        <h1 class="title">Ayarlar</h1>
+        <div style="font-size: 0.9rem; color: #636e72; margin-bottom: 15px;">Kendi maceranı kendin seç!</div>
+        
+        <span class="section-label">Cihaz Modu</span>
+        <div class="btn-group">
+            <button class="setup-btn" onclick="setDevice('phone', this)">📱 Telefon</button>
+            <button class="setup-btn active" onclick="setDevice('tablet', this)">📲 Tablet</button>
+            <button class="setup-btn" onclick="setDevice('board', this)">🖥️ Tahta</button>
+        </div>
+
+        <span class="section-label">Oyun Modu</span>
+        <div class="btn-group">
+            <button class="setup-btn active" onclick="setMode('time', this)">⏱️ 60sn</button>
+            <button class="setup-btn" onclick="setMode('count', this)">📝 20 Soru</button>
+            <button class="setup-btn" onclick="setMode('survival', this)">🔥 Zamana Karşı</button>
+            <button class="setup-btn" onclick="setMode('versus', this)">👥 Arkadaşla Yarış</button>
+            <button class="setup-btn" style="background:#0984e3; color:white; border-color:#0984e3;" onclick="setMode('online', this)">🌍 Online Düello</button>
+        </div>
+        
+        <!-- Versus Mode Inputs -->
+        <div id="versus-names" class="versus-inputs hidden">
+            <input id="p1-input" class="name-input" type="text" placeholder="1. Oyuncu Adı" maxlength="10">
+            <input id="p2-input" class="name-input" type="text" placeholder="2. Oyuncu Adı" maxlength="10">
+        </div>
+
+        <!-- Online Lobby UI -->
+        <div id="online-lobby" class="online-lobby hidden">
+             <div style="display:flex; gap:10px;">
+                 <button class="setup-btn active" onclick="createRoom()">Oda Kur</button>
+                 <button class="setup-btn" onclick="showJoinInput()">Odaya Katıl</button>
+             </div>
+             
+             <!-- Join Input -->
+             <div id="join-area" class="hidden" style="margin-top:10px;">
+                 <input id="room-code-input" class="room-code-input" type="number" placeholder="Kodu Gir">
+                 <button class="big-start-btn" style="margin-top:10px; padding:10px;" onclick="joinRoom()">KATIL</button>
+             </div>
+
+             <!-- Waiting Area -->
+             <div id="waiting-area" class="hidden" style="margin-top:20px;">
+                 <div class="lobby-status">Oda Kodu:</div>
+                 <div class="room-code-display" id="room-code-display">---</div>
+                 <div class="lobby-status" id="lobby-status-text">Rakip Bekleniyor...</div>
+             </div>
+        </div>
+        
+        <span class="section-label" id="diff-label">Zorluk</span>
+        <div class="btn-group" id="diff-group">
+            <button class="setup-btn active" onclick="setDiff(1, this)">Kolay</button>
+            <button class="setup-btn" onclick="setDiff(2, this)">Orta</button>
+            <button class="setup-btn" onclick="setDiff(3, this)">Zor</button>
+        </div>
+
+        <span class="section-label" id="op-label">İşlemler</span>
+        <div class="btn-group" id="op-group">
+            <button class="setup-btn active op-btn" onclick="toggleOp('+', this)">Toplama</button>
+            <button class="setup-btn active op-btn" onclick="toggleOp('-', this)">Çıkarma</button>
+            <button class="setup-btn op-btn" onclick="toggleOp('*', this)">Çarpma</button>
+            <button class="setup-btn op-btn" onclick="toggleOp('/', this)">Bölme</button>
+        </div>
+
+        <button id="main-start-btn" class="big-start-btn" onclick="prepareGame('setup-screen')">BAŞLA</button>
+        <button class="big-start-btn secondary-btn" style="margin-top:10px; background:white;" onclick="showStats()">🏅 BAŞARILARIM</button>
+
+        <div id="mode-toast" class="mode-toast">En çok doğruyu 60 saniyede yapmaya çalış!</div>
+    </div>
+</div>
+
+<!-- READY SCREEN (INSTRUCTIONS) -->
+<div id="ready-screen" class="screen hidden" style="background: rgba(108, 92, 231, 0.1);">
+    <div class="setup-card">
+        <h2 class="title" id="ready-title">Hazır Mısın?</h2>
+        <div style="text-align: left; background: #f1f2f6; padding: 20px; border-radius: 20px; margin: 20px 0;">
+            <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.5rem;">✅</span> Doğru cevaplar sana puan ve seri kazandırır.
+            </div>
+            <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.5rem;">🧊</span> Yanlış cevap verirsen <strong>TUŞLAR DONAR!</strong>
+            </div>
+            <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.5rem;">⏭️</span> Zorlanırsan <strong>PAS</strong> hakkını kullan.
+            </div>
+        </div>
+        <button class="big-start-btn" style="background: var(--primary);" onclick="startCountdown()">HAZIRIM!</button>
+    </div>
+</div>
+
+<!-- COUNTDOWN OVERLAY -->
+<div id="countdown-overlay" class="hidden">3</div>
+
+<!-- STATS SCREEN -->
+<div id="stats-screen" class="screen hidden">
+    <div class="setup-card">
+        <h2 class="title" style="color:var(--dark)">🏅 Başarılarım</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-icon">🎮</span>
+                <h3>Toplam Oyun</h3>
+                <p id="stat-total-games">0</p>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">🏆</span>
+                <h3>En Yüksek Puan</h3>
+                <p id="stat-high-score" style="color:var(--gold)">0</p>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">✅</span>
+                <h3>Toplam Doğru</h3>
+                <p id="stat-total-correct" style="color:var(--success)">0</p>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">⏳</span>
+                <h3>Toplam Süre</h3>
+                <p id="stat-total-time" style="font-size:1.1rem; color:var(--primary)">0s</p>
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button class="big-start-btn secondary-btn" style="background: #e74c3c; color: white; margin-top:0;" onclick="resetStats()">SIFIRLA</button>
+            <button class="big-start-btn" style="margin-top:0;" onclick="switchScreen('stats-screen', 'setup-screen')">GERİ DÖN</button>
+        </div>
+    </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="game-screen" class="screen hidden" style="background: transparent;">
+    <div id="game-header">
+        <div class="header-controls">
+            <button class="modern-icon-btn" onclick="confirmHome()" title="Ana Sayfa">
+                <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            </button>
+            <button class="modern-icon-btn" onclick="togglePause()" title="Duraklat">
+                <svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
+        </div>
+        
+        <div class="progress-container">
+            <div class="level-badge" id="level-txt">Seviye 1</div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progress-bar"></div>
+            </div>
+        </div>
+
+        <div class="score-box">
+            <div style="font-size:0.6rem; opacity:0.8;">PUAN</div>
+            <div id="score-display">0</div>
+        </div>
+    </div>
+
+    <div id="game-area">
+        <!-- Zamanlayıcı Göstergesi -->
+        <div class="timer-container" id="timer-box" style="margin-bottom:10px; font-weight:700; color:#b2bec3; display:flex; gap:5px; align-items:center;">
+             <span id="mode-icon-display">⏱️</span> <span id="time-display" style="font-size: 1.5rem;">60</span>
+        </div>
+
+        <div class="question-container" id="q-container">
+            <div class="streak-container" id="streak-badge">x2 SERİ!</div>
+            <div class="question-text" id="q-text">2 + 2</div>
+            <div class="answer-preview" id="ans-preview"></div>
+        </div>
+
+        <div class="numpad" id="numpad-area">
+            <!-- Row 1 -->
+            <button class="btn" onclick="input(1)">1</button>
+            <button class="btn" onclick="input(2)">2</button>
+            <button class="btn" onclick="input(3)">3</button>
+            <!-- Row 2 -->
+            <button class="btn" onclick="input(4)">4</button>
+            <button class="btn" onclick="input(5)">5</button>
+            <button class="btn" onclick="input(6)">6</button>
+            <!-- Row 3 -->
+            <button class="btn" onclick="input(7)">7</button>
+            <button class="btn" onclick="input(8)">8</button>
+            <button class="btn" onclick="input(9)">9</button>
+            <!-- Row 4 -->
+            <button class="btn btn-del" onclick="input('del')">SİL</button>
+            <button class="btn" onclick="input(0)">0</button>
+            <button class="btn btn-pas" id="btn-pas" onclick="passQuestion()">
+                <span>PAS</span>
+                <div class="pas-dots" id="pas-dots">
+                    <div class="pas-dot active"></div>
+                    <div class="pas-dot active"></div>
+                    <div class="pas-dot active"></div>
+                </div>
+            </button>
+        </div>
+        
+        <div class="submit-area">
+            <button class="btn-submit" onclick="checkAnswer()">CEVAPLA</button>
+        </div>
+    </div>
+</div>
+
+<!-- PAUSE MODAL -->
+<div id="pause-modal" class="modal-overlay hidden">
+    <div class="setup-card" style="max-width:300px;">
+        <h2 class="title">DURAKLATILDI</h2>
+        <button class="big-start-btn" onclick="togglePause()">DEVAM ET</button>
+        <button class="big-start-btn secondary-btn" style="background:var(--danger); color:white;" onclick="quitGame()">ÇIKIŞ</button>
+    </div>
+</div>
+
+<!-- VERSUS INTERSTITIAL MODAL -->
+<div id="versus-modal" class="modal-overlay hidden">
+    <div class="setup-card" style="max-width:400px;">
+        <h2 class="title">Sıra Diğerinde!</h2>
+        <p id="versus-msg" style="margin-bottom:20px; font-size:1.1rem; color:#636e72;">Sıra 2. Oyuncuda</p>
+        <button class="big-start-btn" onclick="startVersusRound2()">HAZIRIM!</button>
+    </div>
+</div>
+
+<!-- RESULT SCREEN -->
+<div id="result-screen" class="screen hidden">
+    <canvas id="confetti-canvas" style="position:absolute; inset:0; pointer-events:none;"></canvas>
+    <div style="font-size: 4rem; z-index:10; position:relative;">🏆</div>
+    <h1 id="result-title" style="color:var(--dark); z-index:10; position:relative;">Oyun Bitti!</h1>
+    
+    <div id="new-record-msg" class="hidden" style="background:var(--gold); padding:5px 15px; border-radius:10px; font-weight:700; color:#d35400; margin-bottom:10px; z-index:10;">YENİ REKOR! 🔥</div>
+    
+    <div class="result-score" id="final-score">0</div>
+    
+    <div id="stats-detail-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; width:100%; max-width:400px; margin-bottom:20px; z-index:10; position:relative;">
+        <div style="background:#f1f2f6; padding:15px; border-radius:15px; text-align:center;">
+            <div class="stat-label">Doğru</div>
+            <div style="font-weight:800; font-size:1.5rem; color:var(--success);" id="final-correct">0</div>
+        </div>
+        <div style="background:#f1f2f6; padding:15px; border-radius:15px; text-align:center;">
+            <div class="stat-label">Yanlış</div>
+            <div style="font-weight:800; font-size:1.5rem; color:var(--danger);" id="final-wrong">0</div>
+        </div>
+    </div>
+    
+    <!-- Versus Result Area -->
+    <div id="versus-result-area" class="hidden" style="width:100%; max-width:500px; margin-bottom:20px; z-index:10;">
+        <div style="display:flex; justify-content:space-around; align-items:center; background:#f8f9fa; padding:15px; border-radius:15px; border:2px solid #eee;">
+             <div style="text-align:center;">
+                 <div id="res-p1-name" class="stat-label" style="color:var(--primary)">P1</div>
+                 <div id="res-p1-score" style="font-size:2rem; font-weight:800;">0</div>
+             </div>
+             <div style="font-size:1.5rem; font-weight:900; color:#b2bec3;">VS</div>
+             <div style="text-align:center;">
+                 <div id="res-p2-name" class="stat-label" style="color:var(--secondary)">P2</div>
+                 <div id="res-p2-score" style="font-size:2rem; font-weight:800;">0</div>
+             </div>
+        </div>
+        <div id="winner-msg" style="margin-top:15px; font-size:1.5rem; font-weight:900; color:var(--success);">Kazanan: Sami!</div>
+    </div>
+
+    <button class="big-start-btn" style="max-width:300px; z-index:10; position:relative;" onclick="prepareGame('result-screen')">TEKRAR OYNA</button>
+    <button class="big-start-btn secondary-btn" style="max-width:300px; margin-top:10px; z-index:10; position:relative; background:white;" onclick="goHome()">ANA SAYFA</button>
+</div>
+
+<div id="overlay-feedback" class="overlay-msg">DOĞRU!</div>
+
+<!-- Firebase Logic & Game Code -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+  import { getDatabase, ref, set, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD4zIUFTJEzFrDc6UTKTRPFtAvsM3t97z0",
+    authDomain: "matematik-ustasi.firebaseapp.com",
+    databaseURL: "https://matematik-ustasi-default-rtdb.firebaseio.com",
+    projectId: "matematik-ustasi",
+    storageBucket: "matematik-ustasi.firebasestorage.app",
+    messagingSenderId: "748610525562",
+    appId: "1:748610525562:web:3d1c0396f47f465f8a9ec3"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Expose DB functions to window for global access
+  window.db = db;
+  window.ref = ref;
+  window.set = set;
+  window.onValue = onValue;
+  window.update = update;
+  window.remove = remove;
+  window.get = get;
+
+  // --- OYUN AYARLARI VE DURUMU ---
+    let config = { diff: 1, ops: ['+', '-'], mode: 'time', device: 'tablet' };
+    let state = { 
+        score: 0, 
+        time: 60, 
+        active: false, 
+        paused: false,
+        frozen: false,
+        currentQ: {}, 
+        input: '', 
+        streak: 0, 
+        correct: 0, 
+        wrong: 0,
+        passes: 3,
+        levelProgress: 0,
+        level: 1,
+        questionsAnswered: 0,
+        sessionTime: 0,
+        // Versus Mode State
+        versusTurn: 1,
+        p1Name: '', p2Name: '', p1Score: 0, p2Score: 0,
+        // Online Mode State
+        isOnline: false,
+        roomCode: null,
+        playerId: null, // 'p1' or 'p2'
+        opponentScore: 0
+    };
+    let timerInterval;
+    let stats = JSON.parse(localStorage.getItem('mathStats')) || { games: 0, best: 0, correct: 0, wrong: 0, totalSeconds: 0 };
+    
+    // --- SES SİSTEMİ ---
+    let soundEnabled = true;
+    let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playSound(type) {
+        if (!soundEnabled) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+
+        if (type === 'click') {
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(600, now);
+            osc.frequency.exponentialRampToValueAtTime(300, now + 0.05);
+            gainNode.gain.setValueAtTime(0.05, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.05);
+            osc.start(now); osc.stop(now + 0.05);
+        } else if (type === 'correct') {
+            osc.type = 'sine'; osc.frequency.setValueAtTime(500, now);
+            osc.frequency.exponentialRampToValueAtTime(1000, now + 0.1);
+            gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.3);
+            osc.start(now); osc.stop(now + 0.3);
+        } else if (type === 'wrong') { 
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, now);
+            osc.frequency.linearRampToValueAtTime(50, now + 0.4);
+            gainNode.gain.setValueAtTime(0.2, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.4);
+            osc.start(now); osc.stop(now + 0.4);
+        } else if (type === 'pass') {
+             osc.type = 'square'; osc.frequency.setValueAtTime(300, now);
+             gainNode.gain.setValueAtTime(0.05, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.1);
+             osc.start(now); osc.stop(now + 0.1);
+        } else if (type === 'start') {
+             osc.type = 'triangle'; osc.frequency.setValueAtTime(400, now);
+             osc.frequency.exponentialRampToValueAtTime(800, now + 0.3);
+             gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.3);
+             osc.start(now); osc.stop(now + 0.3);
+        }
+    }
+
+    // --- GLOBAL FUNCTIONS EXPORT ---
+    window.toggleSound = function() {
+        soundEnabled = !soundEnabled;
+        document.getElementById('sound-icon').textContent = soundEnabled ? '🔊' : '🔇';
+    };
+
+    window.switchScreen = function(fromId, toId) {
+        playSound('click');
+        const fromEl = document.getElementById(fromId);
+        const toEl = document.getElementById(toId);
+        fromEl.classList.add('fade-out');
+        setTimeout(() => {
+            fromEl.classList.add('hidden');
+            fromEl.classList.remove('fade-out');
+            toEl.classList.remove('hidden');
+        }, 300);
+    };
+
+    window.setDevice = function(dev, btn) {
+        playSound('click'); config.device = dev; document.body.className = `mode-${dev}`; updateBtnGroup(btn);
+    };
+
+    window.setMode = function(m, btn) {
+        playSound('click'); config.mode = m; updateBtnGroup(btn);
+        
+        // UI visibility
+        document.getElementById('versus-names').classList.add('hidden');
+        document.getElementById('online-lobby').classList.add('hidden');
+        document.getElementById('diff-label').classList.remove('hidden');
+        document.getElementById('diff-group').classList.remove('hidden');
+        document.getElementById('op-label').classList.remove('hidden');
+        document.getElementById('op-group').classList.remove('hidden');
+        document.getElementById('main-start-btn').classList.remove('hidden');
+
+        if (m === 'versus') {
+             document.getElementById('versus-names').classList.remove('hidden');
+        }
+        else if (m === 'online') {
+             document.getElementById('online-lobby').classList.remove('hidden');
+             // Hide unnecessary options for lobby
+             document.getElementById('diff-label').classList.add('hidden');
+             document.getElementById('diff-group').classList.add('hidden');
+             document.getElementById('op-label').classList.add('hidden');
+             document.getElementById('op-group').classList.add('hidden');
+             document.getElementById('main-start-btn').classList.add('hidden');
+        }
+
+        const toast = document.getElementById('mode-toast');
+        let msg = "";
+        if(m === 'time') msg = "⏱️ En çok doğruyu 60 saniyede yapmaya çalış!";
+        else if(m === 'count') msg = "📝 Stres yok! 20 soruyu kendi hızında çöz.";
+        else if(m === 'survival') msg = "🔥 Her doğru ek süre verir, yanlış süreni götürür!";
+        else if(m === 'versus') msg = "👥 Arkadaşınla sıra ile yarış, en yüksek puanı topla!";
+        else if(m === 'online') msg = "🌍 Odaya bağlan, rakibinle aynı anda yarış!";
+        
+        toast.textContent = msg; toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    };
+
+    window.setDiff = function(d, btn) { playSound('click'); config.diff = d; updateBtnGroup(btn); };
+    window.toggleOp = function(op, btn) {
+        playSound('click');
+        if (config.ops.includes(op)) {
+            if (config.ops.length > 1) { config.ops = config.ops.filter(o => o !== op); btn.classList.remove('active'); }
+        } else { config.ops.push(op); btn.classList.add('active'); }
+    };
+
+    function updateBtnGroup(btn) {
+        let siblings = btn.parentElement.children;
+        for (let sib of siblings) { if(!sib.classList.contains('op-btn')) sib.classList.remove('active'); }
+        btn.classList.add('active');
+    }
+    
+    // --- HELPER FUNCTIONS ---
+    function formatTime(seconds) {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+        if(h > 0) return `${h}sa ${m}dk`;
+        return `${m}dk ${s}sn`;
+    }
+
+    // --- ONLINE LOBBY LOGIC ---
+    window.createRoom = function() {
+        const code = Math.floor(10000 + Math.random() * 90000); // 5 digit code
+        state.roomCode = code;
+        state.playerId = 'p1';
+        state.isOnline = true;
+
+        document.getElementById('join-area').classList.add('hidden');
+        document.getElementById('waiting-area').classList.remove('hidden');
+        document.getElementById('room-code-display').textContent = code;
+        document.getElementById('lobby-status-text').textContent = "Rakip Bekleniyor...";
+
+        // Set Initial DB State
+        set(ref(db, 'rooms/' + code), {
+            status: 'waiting',
+            p1Score: 0,
+            p2Score: 0,
+            currentQuestion: null,
+            winner: null
+        });
+
+        // Listen for changes
+        listenToRoom(code);
+    };
+
+    window.showJoinInput = function() {
+        document.getElementById('join-area').classList.remove('hidden');
+        document.getElementById('waiting-area').classList.add('hidden');
+    };
+
+    window.joinRoom = function() {
+        const code = document.getElementById('room-code-input').value;
+        if(!code) return alert("Lütfen kodu girin");
+        
+        get(ref(db, 'rooms/' + code)).then((snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                if(data.status === 'waiting') {
+                    state.roomCode = code;
+                    state.playerId = 'p2';
+                    state.isOnline = true;
+                    
+                    // Update room status to start
+                    update(ref(db, 'rooms/' + code), {
+                        status: 'playing'
+                    });
+                    
+                    listenToRoom(code);
+                } else {
+                    alert("Oda dolu veya oyun başlamış!");
+                }
+            } else {
+                alert("Oda bulunamadı!");
+            }
+        });
+    };
+
+    function listenToRoom(code) {
+        onValue(ref(db, 'rooms/' + code), (snapshot) => {
+            const data = snapshot.val();
+            if(!data) return; // Room deleted
+
+            // Game Start
+            if(data.status === 'playing' && state.active === false) {
+                 if(state.playerId === 'p1') {
+                     // Host generates first question
+                     generateOnlineQuestion();
+                 }
+                 prepareGame('setup-screen'); // Navigate to ready
+            }
+
+            // Sync Scores
+            if(state.active) {
+                if(state.playerId === 'p1') {
+                    state.opponentScore = data.p2Score || 0;
+                    state.score = data.p1Score || 0;
+                } else {
+                    state.opponentScore = data.p1Score || 0;
+                    state.score = data.p2Score || 0;
+                }
+                document.getElementById('score-display').textContent = state.score;
+            }
+
+            // Sync Question
+            if(data.currentQuestion) {
+                 // Check if it's a new question
+                 const qHash = data.currentQuestion.text;
+                 if(state.currentQ.text !== qHash) {
+                     state.currentQ = data.currentQuestion;
+                     document.getElementById('q-text').textContent = state.currentQ.text;
+                     document.getElementById('q-text').style.color = 'white';
+                     // Clear input
+                     state.input = '';
+                     updateInputDisplay();
+                     // Unfreeze if frozen
+                     state.frozen = false;
+                     document.getElementById('numpad-area').classList.remove('frozen-pad');
+                     document.getElementById('q-container').classList.remove('shake');
+                 }
+            }
+        });
+    }
+
+    function generateOnlineQuestion() {
+        // Use existing generator logic but push to DB
+        // Simple Medium Difficulty for Online
+        const ops = ['+', '-', '*', '/'];
+        const op = ops[Math.floor(Math.random() * ops.length)];
+        let n1, n2, ans, symbol = op;
+
+        if (op === '+') { n1 = r(30) + 10; n2 = r(20) + 5; ans = n1 + n2; }
+        else if (op === '-') { n1 = r(50) + 20; n2 = r(n1 - 10) + 5; ans = n1 - n2; }
+        else if (op === '*') { symbol = 'x'; n1 = r(9) + 2; n2 = r(9) + 2; ans = n1 * n2; }
+        else { symbol = '÷'; ans = r(9) + 2; n2 = r(4) + 2; n1 = ans * n2; }
+
+        update(ref(db, 'rooms/' + state.roomCode), {
+            currentQuestion: { text: `${n1} ${symbol} ${n2}`, ans: ans }
+        });
+    }
+
+    // --- GAME LOGIC ---
+
+    window.prepareGame = function(fromId = 'setup-screen') {
+        if (config.mode === 'versus') {
+            state.p1Name = document.getElementById('p1-input').value || "1. Oyuncu";
+            state.p2Name = document.getElementById('p2-input').value || "2. Oyuncu";
+            state.versusTurn = 1;
+            document.getElementById('ready-title').textContent = `${state.p1Name} Hazır Mısın?`;
+        } else if (config.mode === 'online') {
+             document.getElementById('ready-title').textContent = "Rakip Bulundu!";
+        } else {
+             document.getElementById('ready-title').textContent = "Hazır Mısın?";
+        }
+        switchScreen(fromId, 'ready-screen');
+    };
+
+    window.startCountdown = function() {
+        playSound('click');
+        document.getElementById('ready-screen').classList.add('hidden');
+        document.getElementById('versus-modal').classList.add('hidden');
+        const countEl = document.getElementById('countdown-overlay');
+        countEl.classList.remove('hidden');
+        
+        let count = 3;
+        countEl.textContent = count;
+        
+        let int = setInterval(() => {
+            count--;
+            if(count > 0) { countEl.textContent = count; playSound('click'); } 
+            else if (count === 0) { countEl.textContent = "BAŞLA!"; playSound('start'); } 
+            else { clearInterval(int); countEl.classList.add('hidden'); startGameLogic(); }
+        }, 800);
+    };
+
+    window.startGameLogic = function() {
+        // Reset Logic
+        if(config.mode !== 'online') { // Online state managed by lobby
+            state.score = 0;
+            state.active = true;
+            state.time = config.mode === 'time' || config.mode === 'versus' ? 60 : 20;
+        } else {
+             state.active = true;
+             state.time = 60; // Fixed time for online
+        }
+        
+        state.paused = false; state.frozen = false;
+        state.input = ''; state.streak = 0;
+        state.correct = 0; state.wrong = 0; state.passes = 3;
+        state.levelProgress = 0; state.level = 1; state.questionsAnswered = 0; state.sessionTime = 0;
+
+        document.getElementById('game-screen').classList.remove('hidden');
+        
+        let modeIcon = '⏱️';
+        if(config.mode === 'survival') modeIcon = '🔥';
+        if(config.mode === 'count') modeIcon = '📝';
+        if(config.mode === 'versus') modeIcon = '👥';
+        if(config.mode === 'online') modeIcon = '🌍';
+        document.getElementById('mode-icon-display').textContent = modeIcon;
+
+        updateUI(); window.updatePasUI(); window.updateProgressBar();
+        
+        if(config.mode !== 'online') window.nextQuestion();
+        
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            if (!state.active || state.paused) return;
+            state.sessionTime++; 
+            if (config.mode !== 'count') {
+                state.time--;
+                updateUI();
+                if (state.time <= 0) window.endGame();
+            }
+        }, 1000);
+    };
+
+    window.togglePause = function() {
+        if(!state.active || config.mode === 'online') return; // Cannot pause online
+        state.paused = !state.paused;
+        const modal = document.getElementById('pause-modal');
+        if(state.paused) modal.classList.remove('hidden');
+        else modal.classList.add('hidden');
+    };
+
+    window.quitGame = function() {
+        state.active = false;
+        clearInterval(timerInterval);
+        document.getElementById('pause-modal').classList.add('hidden');
+        if (config.mode !== 'versus' && config.mode !== 'online') window.saveSessionStats(); 
+        
+        if(config.mode === 'online' && state.roomCode) {
+             // Leave room logic could go here
+             state.isOnline = false;
+        }
+
+        window.goHome();
+    };
+
+    window.confirmHome = function() {
+        if(state.active) {
+            if(config.mode !== 'online') togglePause();
+            if(confirm("Oyundan çıkıp ana sayfaya dönmek istiyor musun?")) window.quitGame();
+            else if(config.mode !== 'online') togglePause();
+        } else { window.quitGame(); }
+    };
+
+    window.goHome = function() {
+        switchScreen('result-screen', 'setup-screen');
+        document.getElementById('game-screen').classList.add('hidden');
+        document.body.style.backgroundColor = "#fdfbf7";
+    };
+
+    window.nextQuestion = function() {
+        if(config.mode === 'online') return; // Online handled by DB listener
+
+        state.input = ''; updateInputDisplay();
+        const ops = config.ops;
+        const op = ops[Math.floor(Math.random() * ops.length)];
+        let n1, n2, ans, symbol = op;
+        
+        // Difficulty Logic
+        if (op === '+') {
+            if (config.diff === 1) { n1 = r(15) + 1; n2 = r(10) + 1; } 
+            else if (config.diff === 2) { n1 = r(35) + 15; n2 = r(30) + 10; } 
+            else { n1 = r(150) + 50; n2 = r(150) + 20; }
+            ans = n1 + n2;
+        } else if (op === '-') {
+            if (config.diff === 1) { n1 = r(15) + 5; n2 = r(n1 - 1) + 1; } 
+            else if (config.diff === 2) { n1 = r(50) + 20; n2 = r(n1 - 10) + 5; } 
+            else { n1 = r(150) + 50; n2 = r(n1 - 20) + 10; }
+            ans = n1 - n2;
+        } else if (op === '*') {
+            symbol = 'x';
+            if (config.diff === 1) { n1 = r(4) + 2; n2 = r(9) + 1; } 
+            else if (config.diff === 2) { n1 = r(4) + 6; n2 = r(9) + 2; } 
+            else { n1 = r(15) + 10; n2 = r(4) + 2; }
+            ans = n1 * n2;
+        } else { 
+            symbol = '÷';
+             if (config.diff === 1) { ans = r(4) + 2; n2 = r(2) + 2; n1 = ans * n2; } 
+             else if (config.diff === 2) { ans = r(7) + 2; n2 = r(4) + 2; n1 = ans * n2; } 
+             else { ans = r(10) + 5; n2 = r(6) + 3; n1 = ans * n2; }
+        }
+
+        state.currentQ = { text: `${n1} ${symbol} ${n2}`, ans: ans };
+        const qEl = document.getElementById('q-text');
+        qEl.textContent = state.currentQ.text;
+        qEl.style.color = 'white'; 
+    };
+
+    function r(max) { return Math.floor(Math.random() * max); }
+
+    window.input = function(val) {
+        if (!state.active || state.paused || state.frozen) return;
+        playSound('click');
+        if (val === 'del') state.input = state.input.slice(0, -1);
+        else if (state.input.length < 5) state.input += val;
+        updateInputDisplay();
+    };
+
+    function updateInputDisplay() {
+        const prev = document.getElementById('ans-preview');
+        prev.textContent = state.input;
+        if(state.input) prev.style.borderColor = "var(--primary)"; else prev.style.borderColor = "rgba(255,255,255,0.3)";
+    }
+
+    window.passQuestion = function() {
+        if (!state.active || state.paused || state.frozen) return;
+        if (state.passes > 0) {
+            playSound('pass'); state.passes--; state.streak = 0; updatePasUI();
+            if(config.mode === 'online') {
+                 // In online, passing just creates new question without point
+                 showFeedback("PAS GEÇTİN", "warn");
+                 generateOnlineQuestion();
+            } else {
+                 window.nextQuestion();
+                 showFeedback("PAS GEÇTİN", "warn");
+            }
+        } else {
+            document.getElementById('btn-pas').classList.add('shake');
+            setTimeout(() => document.getElementById('btn-pas').classList.remove('shake'), 300);
+        }
+    };
+
+    window.updatePasUI = function() {
+        const dots = document.querySelectorAll('.pas-dot');
+        dots.forEach((dot, idx) => {
+            if (idx < state.passes) dot.classList.add('active'); else dot.classList.remove('active');
+        });
+        document.getElementById('btn-pas').style.opacity = state.passes === 0 ? '0.5' : '1';
+    };
+
+    window.checkAnswer = function() {
+        if (!state.input || !state.active || state.paused || state.frozen) return;
+        const val = parseInt(state.input);
+        
+        if (val === state.currentQ.ans) {
+            playSound('correct'); state.correct++; state.streak++; state.questionsAnswered++;
+            
+            let basePoints = config.diff * 10;
+            let multiplier = Math.min(Math.floor(state.streak / 3) + 1, 5);
+            state.score += basePoints * multiplier;
+
+            if (config.mode === 'survival') state.time += 2; 
+
+            state.levelProgress += 20; 
+            if (state.levelProgress >= 100) { state.level++; state.levelProgress = 0; playSound('correct'); }
+            updateProgressBar();
+
+            showFeedback("DOĞRU!", "success");
+            
+            document.getElementById('q-container').classList.add('pop');
+            setTimeout(()=>document.getElementById('q-container').classList.remove('pop'), 200);
+
+            updateUI();
+
+            if(config.mode === 'online') {
+                // Update DB score and Generate New Question
+                const updates = {};
+                updates[state.playerId + 'Score'] = state.score;
+                update(ref(db, 'rooms/' + state.roomCode), updates);
+                generateOnlineQuestion();
+            } else if (config.mode === 'count' && state.questionsAnswered >= 20) {
+                window.endGame();
+            } else {
+                window.nextQuestion();
+            }
+
+        } else {
+            playSound('wrong'); state.streak = 0; state.wrong++;
+            state.levelProgress = Math.max(0, state.levelProgress - 10);
+            updateProgressBar();
+
+            if (config.mode === 'survival') state.time = Math.max(0, state.time - 5);
+            
+            window.handleWrongAnswer();
+        }
+    };
+
+    window.handleWrongAnswer = function() {
+        state.frozen = true; updateUI(); 
+        
+        showFeedback("DONDU! 🧊", "ice");
+        document.getElementById('q-container').classList.add('shake');
+        document.getElementById('numpad-area').classList.add('frozen-pad');
+
+        const qText = document.getElementById('q-text');
+        const originalText = state.currentQ.text;
+        qText.innerHTML = `${originalText} = <span style="color:var(--success)">${state.currentQ.ans}</span>`;
+
+        setTimeout(() => {
+            state.frozen = false;
+            document.getElementById('q-container').classList.remove('shake');
+            document.getElementById('numpad-area').classList.remove('frozen-pad');
+            if(config.mode !== 'online') window.nextQuestion();
+            // In online, we just unfreeze, the question remains until someone solves it or passes
+        }, 2000); 
+    };
+
+    window.updateProgressBar = function() {
+        document.getElementById('progress-bar').style.width = `${state.levelProgress}%`;
+        document.getElementById('level-txt').textContent = `Seviye ${state.level}`;
+        const colors = ["#fdfbf7", "#e3f2fd", "#e8f5e9", "#fff3e0", "#f3e5f5"];
+        document.body.style.backgroundColor = colors[(state.level - 1) % colors.length];
+    };
+
+    function updateUI() {
+        document.getElementById('score-display').textContent = state.score;
+        const tDiv = document.getElementById('time-display');
+        const tContainer = document.getElementById('timer-box');
+        
+        if (config.mode === 'count') {
+            tDiv.textContent = `${state.questionsAnswered} / 20`;
+            tDiv.style.color = 'var(--dark)';
+            tContainer.classList.remove('blink-slow', 'blink-fast');
+        } else {
+            tDiv.textContent = state.time;
+            tContainer.classList.remove('blink-slow', 'blink-fast');
+            if (state.time <= 5) tContainer.classList.add('blink-fast');
+            else if (state.time <= 10) tContainer.classList.add('blink-slow');
+            else tDiv.style.color = 'var(--dark)';
+        }
+
+        const badge = document.getElementById('streak-badge');
+        if (state.streak >= 3) {
+            let mult = Math.min(Math.floor(state.streak / 3) + 1, 5);
+            badge.textContent = `x${mult} SERİ! 🔥`; badge.classList.add('streak-active');
+        } else { badge.classList.remove('streak-active'); }
+    }
+
+    function showFeedback(text, type) {
+        const el = document.getElementById('overlay-feedback');
+        el.textContent = text;
+        if(type === 'success') el.style.color = 'var(--success)';
+        else if(type === 'danger') el.style.color = 'var(--danger)';
+        else if(type === 'warn') el.style.color = 'var(--warn)';
+        else if(type === 'ice') el.style.color = '#0984e3'; 
+        el.classList.remove('fade-up'); void el.offsetWidth; el.classList.add('fade-up');
+    }
+    
+    window.saveSessionStats = function() {
+        if (config.mode === 'versus' || config.mode === 'online') return;
+        stats.games++; stats.correct += state.correct; stats.wrong += state.wrong;
+        stats.totalSeconds = (stats.totalSeconds || 0) + state.sessionTime;
+        if (state.score > stats.best) {
+            stats.best = state.score; document.getElementById('new-record-msg').classList.remove('hidden'); window.startConfetti();
+        } else {
+            document.getElementById('new-record-msg').classList.add('hidden');
+            if(state.score > 500) window.startConfetti();
+        }
+        localStorage.setItem('mathStats', JSON.stringify(stats));
+    };
+
+    window.endGame = function() {
+        clearInterval(timerInterval);
+        state.active = false;
+        
+        if (config.mode === 'versus') {
+            if (state.versusTurn === 1) {
+                state.p1Score = state.score; state.versusTurn = 2;
+                document.getElementById('game-screen').classList.add('hidden');
+                document.getElementById('versus-modal').classList.remove('hidden');
+                document.getElementById('versus-msg').textContent = `Sıra ${state.p2Name}'da!`;
+                return;
+            } else {
+                state.p2Score = state.score;
+                switchScreen('game-screen', 'result-screen');
+                document.getElementById('result-title').textContent = "Düello Bitti!";
+                document.getElementById('stats-detail-grid').classList.add('hidden');
+                document.getElementById('versus-result-area').classList.remove('hidden');
+                document.getElementById('res-p1-name').textContent = state.p1Name;
+                document.getElementById('res-p1-score').textContent = state.p1Score;
+                document.getElementById('res-p2-name').textContent = state.p2Name;
+                document.getElementById('res-p2-score').textContent = state.p2Score;
+                
+                let winnerText = ""; let winnerColor = "var(--gold)";
+                if (state.p1Score > state.p2Score) winnerText = `Kazanan: ${state.p1Name}! 🏆`;
+                else if (state.p2Score > state.p1Score) winnerText = `Kazanan: ${state.p2Name}! 🏆`;
+                else { winnerText = "Berabere! 🤝"; winnerColor = "var(--dark)"; }
+                const winMsg = document.getElementById('winner-msg');
+                winMsg.textContent = winnerText; winMsg.style.color = winnerColor;
+                window.startConfetti();
+                document.getElementById('new-record-msg').classList.add('hidden');
+                document.getElementById('final-score').classList.add('hidden');
+                return;
+            }
+        } else if (config.mode === 'online') {
+             // Online Results
+             switchScreen('game-screen', 'result-screen');
+             document.getElementById('result-title').textContent = "Oyun Bitti!";
+             document.getElementById('stats-detail-grid').classList.add('hidden');
+             document.getElementById('versus-result-area').classList.remove('hidden');
+             
+             // In online, opponent score is in state
+             document.getElementById('res-p1-name').textContent = "Sen";
+             document.getElementById('res-p1-score').textContent = state.score;
+             document.getElementById('res-p2-name').textContent = "Rakip";
+             document.getElementById('res-p2-score').textContent = state.opponentScore;
+
+             let winnerText = "";
+             if (state.score > state.opponentScore) winnerText = `Kazandın! 🏆`;
+             else if (state.opponentScore > state.score) winnerText = `Kaybettin... 😔`;
+             else winnerText = "Berabere! 🤝";
+             
+             document.getElementById('winner-msg').textContent = winnerText;
+             window.startConfetti();
+             return;
+        }
+        
+        window.saveSessionStats();
+
+        switchScreen('game-screen', 'result-screen');
+        document.getElementById('result-title').textContent = "Oyun Bitti!";
+        document.getElementById('stats-detail-grid').classList.remove('hidden');
+        document.getElementById('versus-result-area').classList.add('hidden');
+        document.getElementById('final-score').classList.remove('hidden');
+        document.getElementById('final-score').textContent = state.score;
+        document.getElementById('final-correct').textContent = state.correct;
+        document.getElementById('final-wrong').textContent = state.wrong;
+    };
+
+    // --- UTILS ---
+    window.startVersusRound2 = function() {
+        document.getElementById('versus-modal').classList.add('hidden');
+        document.getElementById('ready-title').textContent = `${state.p2Name} Hazır Mısın?`;
+        document.getElementById('ready-screen').classList.remove('hidden');
+    };
+    
+    window.showStats = function() {
+        switchScreen('setup-screen', 'stats-screen');
+        document.getElementById('stat-total-games').textContent = stats.games;
+        document.getElementById('stat-high-score').textContent = stats.best;
+        document.getElementById('stat-total-correct').textContent = stats.correct;
+        document.getElementById('stat-total-time').textContent = formatTime(stats.totalSeconds || 0);
+    };
+
+    window.resetStats = function() {
+        if(confirm("Tüm istatistiklerin silinecek. Emin misin?")) {
+            localStorage.removeItem('mathStats');
+            stats = { games: 0, best: 0, correct: 0, wrong: 0, totalSeconds: 0 };
+            document.getElementById('stat-total-games').textContent = 0;
+            document.getElementById('stat-high-score').textContent = 0;
+            document.getElementById('stat-total-correct').textContent = 0;
+            document.getElementById('stat-total-time').textContent = "0s";
+            playSound('wrong');
+        }
+    };
+    
+    // --- CONFETTI ---
+    let confettiActive = false; let confettiAnim;
+    window.startConfetti = function() {
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const pieces = []; const colors = ['#f1c40f', '#e74c3c', '#3498db', '#9b59b6', '#2ecc71', '#ff9ff3'];
+        for(let i=0; i<150; i++) pieces.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height-canvas.height, w: Math.random()*10+5, h: Math.random()*10+5, c: colors[Math.floor(Math.random()*colors.length)], s: Math.random()*5+2, a: Math.random()*Math.PI*2 });
+        confettiActive = true;
+        function loop() {
+            if(!confettiActive) return;
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            pieces.forEach(p => {
+                p.y += p.s; p.a += 0.05; if(p.y > canvas.height) p.y = -20;
+                ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a); ctx.fillStyle = p.c; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h); ctx.restore();
+            });
+            confettiAnim = requestAnimationFrame(loop);
+        }
+        loop(); setTimeout(() => window.stopConfetti(), 5000); 
+    };
+    window.stopConfetti = function() {
+        confettiActive = false; cancelAnimationFrame(confettiAnim);
+        const canvas = document.getElementById('confetti-canvas'); if(canvas) canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+    };
+
+    const facts = [
+        "Sıfır rakamı tarihte ilk kez Hindistan'da kullanılmıştır!",
+        "Karıncaların adım sayılarını sayabildiğini biliyor muydun?",
+        "Eşittir işareti (=) 1557 yılında Robert Recorde tarafından icat edildi.",
+        "Bir pizzanın yarıçapı 'z' ve yüksekliği 'a' ise hacmi Pi x z x z x a = Pizza'dır!",
+        "4 rakamı Asya'nın bazı bölgelerinde uğursuz sayılır.",
+        "Bal petekleri altıgen şeklindedir çünkü en az balmumu ile en çok balı saklamanın yolu budur.",
+        "9 ile çarpılan her sayının rakamları toplamı 9'un katıdır."
+    ];
+    document.getElementById('daily-fact').textContent = facts[Math.floor(Math.random() * facts.length)];
+</script>
+</body>
+</html>
