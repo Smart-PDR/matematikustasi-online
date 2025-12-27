@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
-    <title>Matematik Ustası | Online Düello</title>
+    <title>Matematik Ustası | Pro Online</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -104,17 +104,43 @@
         .online-lobby {
             display: flex; flex-direction: column; gap: 10px; margin-top: 15px; width: 100%;
         }
-        .room-code-input {
-            width: 100%; padding: 15px; font-size: 1.5rem; text-align: center; letter-spacing: 5px;
-            border: 2px solid var(--light); border-radius: 15px; font-weight: 800; color: var(--dark);
+        .room-code-container {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            background: #f1f2f6; padding: 10px; border-radius: 15px; margin: 10px 0;
+            border: 2px dashed #b2bec3; cursor: pointer;
         }
         .room-code-display {
-            font-size: 3rem; font-weight: 900; color: var(--primary); letter-spacing: 10px; margin: 10px 0;
+            font-size: 2.5rem; font-weight: 900; color: var(--primary); letter-spacing: 5px;
         }
-        .lobby-status {
-            font-size: 1rem; color: #636e72; margin-bottom: 15px; animation: pulse 1.5s infinite;
+        .share-btn {
+            background: white; border: none; width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-size: 1.2rem;
         }
-        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+        
+        .player-card {
+            background: white; border: 3px solid var(--light); padding: 15px; border-radius: 15px;
+            display: flex; align-items: center; gap: 15px; margin-bottom: 10px; transition: 0.3s;
+        }
+        .player-card.ready { border-color: var(--success); background: #e6fffa; }
+        .player-avatar { font-size: 2.5rem; }
+        .player-info { text-align: left; flex: 1; }
+        .player-name { font-weight: 800; font-size: 1.1rem; }
+        .player-status { font-size: 0.8rem; font-weight: 600; color: #b2bec3; }
+        .ready-badge { background: var(--success); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; }
+
+        /* Identity Screen */
+        .avatar-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 15px 0;
+        }
+        .avatar-option {
+            font-size: 2rem; cursor: pointer; padding: 5px; border-radius: 10px; border: 2px solid transparent; transition: 0.2s;
+        }
+        .avatar-option.selected { background: var(--warn); border-color: var(--gold); transform: scale(1.1); }
+        .name-input {
+            width: 100%; padding: 15px; border: 2px solid var(--light); border-radius: 15px;
+            font-family: inherit; font-size: 1.2rem; text-align: center; font-weight: 700;
+        }
 
         /* Mode Explanation Toast */
         .mode-toast {
@@ -125,27 +151,15 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
         .mode-toast.show { opacity: 1; }
-        
-        /* Versus Names Input */
-        .versus-inputs {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;
-            animation: fadeIn 0.3s ease;
-        }
-        .name-input {
-            width: 100%; padding: 10px; border: 2px solid var(--light); border-radius: 12px;
-            font-family: inherit; font-size: 1rem; text-align: center;
-        }
-        .name-input:focus { outline: none; border-color: var(--primary); }
 
         /* Stats Bar (Top) */
         #game-header {
             display: grid; grid-template-columns: auto 1fr auto; gap: 15px; align-items: center;
-            padding: 10px 15px; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px);
-            border-bottom: 2px solid rgba(0,0,0,0.05); height: 80px; width: 100%; z-index: 5;
+            padding: 10px 15px; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(0,0,0,0.05); height: 90px; width: 100%; z-index: 5;
         }
         .header-controls { display: flex; gap: 10px; }
         
-        /* Modern Icon Buttons */
         .modern-icon-btn { 
             width: 45px; height: 45px; border-radius: 15px; border: none; font-size: 1.2rem; 
             cursor: pointer; background: white; display: flex; align-items: center; justify-content: center;
@@ -154,23 +168,17 @@
         .modern-icon-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--light); }
         .modern-icon-btn svg { width: 20px; height: 20px; fill: currentColor; }
 
-        .progress-container {
-            width: 100%; display: flex; flex-direction: column; align-items: center;
-        }
-        .progress-track {
-            width: 100%; max-width: 300px; height: 12px; background: #dfe6e9; 
-            border-radius: 10px; overflow: hidden; position: relative;
-        }
-        .progress-fill {
-            height: 100%; background: linear-gradient(90deg, var(--secondary), var(--primary)); 
-            width: 0%; transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+        .progress-container { width: 100%; display: flex; flex-direction: column; align-items: center; }
+        .progress-track { width: 100%; max-width: 300px; height: 12px; background: #dfe6e9; border-radius: 10px; overflow: hidden; position: relative; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--secondary), var(--primary)); width: 0%; transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .level-badge { font-size: 0.75rem; font-weight: 800; color: var(--primary); margin-bottom: 2px; }
 
         .score-box { 
-            background: var(--primary); color: white; padding: 5px 15px; border-radius: 10px; 
-            font-weight: 800; font-size: 1.2rem; min-width: 60px; text-align: center;
+            background: var(--primary); color: white; padding: 5px 10px; border-radius: 10px; 
+            font-weight: 800; font-size: 1.2rem; min-width: 70px; text-align: center;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
+        .score-box.opponent { background: var(--secondary); opacity: 0.8; transform: scale(0.9); }
 
         /* Main Game Area */
         #game-area {
@@ -178,7 +186,6 @@
             width: 100%; max-width: 800px; margin: 0 auto; padding: 10px; position: relative;
         }
 
-        /* Question Bubble */
         .question-container {
             background: var(--dark); color: white; padding: 15px 30px; border-radius: 30px;
             margin-bottom: 15px; text-align: center; position: relative;
@@ -194,7 +201,6 @@
             font-size: 2.2rem; font-weight: 700; color: #81ecec; border: 2px dashed rgba(255,255,255,0.3);
         }
 
-        /* Streak Counter */
         .streak-container {
             position: absolute; top: -15px; right: -5px; background: var(--accent);
             color: white; padding: 4px 12px; border-radius: 20px; font-weight: 800;
@@ -203,20 +209,11 @@
         }
         .streak-active { opacity: 1; animation: bounce 0.5s infinite alternate; }
 
-        /* Numpad */
         .numpad {
             display: grid; grid-template-columns: repeat(3, 1fr);
-            gap: var(--numpad-gap); width: 100%; max-width: 450px;
-            transition: 0.3s;
+            gap: var(--numpad-gap); width: 100%; max-width: 450px; transition: 0.3s;
         }
-        
-        /* Frozen State for Numpad ONLY */
-        .numpad.frozen-pad {
-            opacity: 0.4;
-            filter: grayscale(1);
-            pointer-events: none;
-            transform: scale(0.98);
-        }
+        .numpad.frozen-pad { opacity: 0.4; filter: grayscale(1); pointer-events: none; transform: scale(0.98); }
 
         .btn {
             height: var(--btn-size); border: none; border-radius: 18px;
@@ -235,7 +232,6 @@
         .pas-dot { width: 6px; height: 6px; background: rgba(255,255,255,0.4); border-radius: 50%; }
         .pas-dot.active { background: white; }
 
-        /* Submit Button */
         .submit-area { width: 100%; max-width: 450px; display: grid; grid-template-columns: 1fr; margin-top: 15px; }
         .btn-submit { 
             background: var(--success); color: white; height: 65px; border-radius: 20px;
@@ -253,53 +249,39 @@
         .fade-up { animation: fadeUp 1s forwards; }
         @keyframes fadeUp { 0% { opacity: 0; transform: translate(-50%, -20%) scale(0.8); } 20% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.1); } 80% { opacity: 0.9; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -80%); } }
 
-        /* Timer Blinking Effects */
-        @keyframes blinkAnim { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
         .blink-slow { animation: blinkAnim 1s infinite; color: var(--danger) !important; }
         .blink-fast { animation: blinkAnim 0.3s infinite; color: var(--danger) !important; font-weight: 900; transform: scale(1.1); }
+        @keyframes blinkAnim { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-        /* Timer Container Size */
-        .timer-container {
-             font-size: 1.2rem;
-             transition: 0.3s;
-             padding: 5px 10px;
-             border-radius: 10px;
-        }
+        .timer-container { font-size: 1.2rem; transition: 0.3s; padding: 5px 10px; border-radius: 10px; }
 
-        /* Stats Screen */
+        /* Stats & Modal */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; margin-top: 20px; }
         .stat-card { background: #f8f9fa; padding: 15px; border-radius: 15px; border: 2px solid #eee; text-align: center; display:flex; flex-direction:column; justify-content:center; align-items:center; }
         .stat-card h3 { font-size: 0.8rem; color: #b2bec3; margin-bottom: 5px; text-transform: uppercase; }
         .stat-card p { font-size: 1.5rem; font-weight: 800; color: var(--dark); margin: 0; }
         .stat-icon { font-size: 1.5rem; margin-bottom: 5px; display:block; }
 
-        /* Modal (Pause / Ready) */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
             z-index: 2000; display: flex; align-items: center; justify-content: center;
         }
 
-        /* Countdown Overlay */
         #countdown-overlay {
             position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 3000;
             display: flex; align-items: center; justify-content: center;
             font-size: 8rem; font-weight: 900; color: var(--primary);
         }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Intro Screen Features */
         .intro-features { display: grid; grid-template-columns: 1fr 1fr; gap:10px; margin: 20px 0; }
         .intro-feat { background: #f1f2f6; padding: 15px; border-radius: 15px; text-align: center; font-size: 0.9rem; }
         .intro-icon { font-size: 2rem; display: block; margin-bottom: 5px; }
         
-        /* Educational Tip */
         .edu-tip {
             background: #fff3e0; border: 2px dashed #ffe0b2; padding: 10px; border-radius: 15px;
             font-size: 0.85rem; color: #e67e22; margin-top: 15px; text-align: left;
         }
 
-        /* Result Screen */
         .result-score { font-size: 4rem; font-weight: 900; color: var(--primary); margin: 10px 0; z-index: 10; position: relative; }
         
         @keyframes bounce { from { transform: rotate(10deg) scale(1); } to { transform: rotate(10deg) scale(1.1); } }
@@ -325,39 +307,24 @@
     <span id="sound-icon">🔊</span>
 </button>
 
-<!-- INTRO SCREEN (FIRST LOAD) -->
-<div id="intro-screen" class="screen">
+<!-- IDENTITY SCREEN (NEW) -->
+<div id="identity-screen" class="screen">
     <div class="setup-card">
-        <div style="font-size: 3rem; margin-bottom: 10px;">🎓</div>
-        <h1 class="title">Hoş Geldin!</h1>
-        <p style="color: #636e72; margin-bottom: 15px; font-size: 1.1rem; line-height: 1.5;">
-            Matematik Ustası ile eğlenerek öğrenmeye hazır mısın?
-        </p>
+        <div style="font-size: 3rem; margin-bottom: 10px;">👤</div>
+        <h1 class="title">Kimsin?</h1>
+        <p style="color: #636e72;">Düelloya başlamadan önce profilini oluştur.</p>
         
-        <div class="intro-features">
-            <div class="intro-feat">
-                <span class="intro-icon">🚀</span>
-                <strong>Hızlan</strong>
-            </div>
-            <div class="intro-feat">
-                <span class="intro-icon">⭐</span>
-                <strong>Yüksel</strong>
-            </div>
-            <div class="intro-feat">
-                <span class="intro-icon">🧊</span>
-                <strong>Donma!</strong>
-            </div>
-            <div class="intro-feat">
-                <span class="intro-icon">🏆</span>
-                <strong>Kazan</strong>
-            </div>
+        <div class="avatar-grid">
+            <div class="avatar-option selected" onclick="selectAvatar('😎', this)">😎</div>
+            <div class="avatar-option" onclick="selectAvatar('🐱', this)">🐱</div>
+            <div class="avatar-option" onclick="selectAvatar('🦁', this)">🦁</div>
+            <div class="avatar-option" onclick="selectAvatar('🚀', this)">🚀</div>
+            <div class="avatar-option" onclick="selectAvatar('🦄', this)">🦄</div>
         </div>
 
-        <div class="edu-tip">
-            <strong>💡 Günün Bilgisi:</strong> <span id="daily-fact">Sıfır rakamı tarihte ilk kez Hindistan'da kullanılmıştır!</span>
-        </div>
+        <input type="text" id="player-name-input" class="name-input" placeholder="Adını Yaz (örn: Ali)" maxlength="10">
 
-        <button class="big-start-btn" onclick="switchScreen('intro-screen', 'setup-screen')">BAŞLAYALIM!</button>
+        <button class="big-start-btn" onclick="saveIdentity()">DEVAM ET</button>
     </div>
 </div>
 
@@ -365,7 +332,7 @@
 <div id="setup-screen" class="screen hidden">
     <div class="setup-card">
         <h1 class="title">Ayarlar</h1>
-        <div style="font-size: 0.9rem; color: #636e72; margin-bottom: 15px;">Kendi maceranı kendin seç!</div>
+        <div style="font-size: 0.9rem; color: #636e72; margin-bottom: 15px;">Hoş geldin, <span id="display-player-name" style="font-weight:700; color:var(--primary)">Oyuncu</span>!</div>
         
         <span class="section-label">Cihaz Modu</span>
         <div class="btn-group">
@@ -379,16 +346,10 @@
             <button class="setup-btn active" onclick="setMode('time', this)">⏱️ 60sn</button>
             <button class="setup-btn" onclick="setMode('count', this)">📝 20 Soru</button>
             <button class="setup-btn" onclick="setMode('survival', this)">🔥 Zamana Karşı</button>
-            <button class="setup-btn" onclick="setMode('versus', this)">👥 Arkadaşla Yarış</button>
+            <!-- Versus Removed -->
             <button class="setup-btn" style="background:#0984e3; color:white; border-color:#0984e3;" onclick="setMode('online', this)">🌍 Online Düello</button>
         </div>
         
-        <!-- Versus Mode Inputs -->
-        <div id="versus-names" class="versus-inputs hidden">
-            <input id="p1-input" class="name-input" type="text" placeholder="1. Oyuncu Adı" maxlength="10">
-            <input id="p2-input" class="name-input" type="text" placeholder="2. Oyuncu Adı" maxlength="10">
-        </div>
-
         <!-- Online Lobby UI -->
         <div id="online-lobby" class="online-lobby hidden">
              <div style="display:flex; gap:10px;">
@@ -400,13 +361,6 @@
              <div id="join-area" class="hidden" style="margin-top:10px;">
                  <input id="room-code-input" class="room-code-input" type="number" placeholder="Kodu Gir">
                  <button class="big-start-btn" style="margin-top:10px; padding:10px;" onclick="joinRoom()">KATIL</button>
-             </div>
-
-             <!-- Waiting Area -->
-             <div id="waiting-area" class="hidden" style="margin-top:20px;">
-                 <div class="lobby-status">Oda Kodu:</div>
-                 <div class="room-code-display" id="room-code-display">---</div>
-                 <div class="lobby-status" id="lobby-status-text">Rakip Bekleniyor...</div>
              </div>
         </div>
         
@@ -429,6 +383,37 @@
         <button class="big-start-btn secondary-btn" style="margin-top:10px; background:white;" onclick="showStats()">🏅 BAŞARILARIM</button>
 
         <div id="mode-toast" class="mode-toast">En çok doğruyu 60 saniyede yapmaya çalış!</div>
+    </div>
+</div>
+
+<!-- READY ROOM (ONLINE WAITING) -->
+<div id="ready-room" class="screen hidden">
+    <div class="setup-card">
+        <div style="font-size: 0.9rem; color:#b2bec3; text-transform: uppercase; font-weight:700;">ODA KODU</div>
+        <div class="room-code-container" onclick="shareRoomCode()">
+            <div id="lobby-code-display" class="room-code-display">---</div>
+            <button class="share-btn" title="Kodu Kopyala">🔗</button>
+        </div>
+        <div style="font-size:0.8rem; color:var(--success); margin-bottom:15px; height:1rem;" id="copy-feedback"></div>
+
+        <div id="p1-card" class="player-card">
+            <div class="player-avatar" id="p1-avatar">👤</div>
+            <div class="player-info">
+                <div class="player-name" id="p1-name">Bekleniyor...</div>
+                <div class="player-status" id="p1-status">Hazırlanıyor</div>
+            </div>
+        </div>
+
+        <div id="p2-card" class="player-card">
+            <div class="player-avatar" id="p2-avatar">👤</div>
+            <div class="player-info">
+                <div class="player-name" id="p2-name">Bekleniyor...</div>
+                <div class="player-status" id="p2-status">Bağlantı Yok</div>
+            </div>
+        </div>
+
+        <button id="ready-btn" class="big-start-btn" style="background:var(--light); color:var(--dark);" onclick="toggleReady()">HAZIR DEĞİLİM</button>
+        <button class="big-start-btn secondary-btn" style="margin-top:10px; background:white; color:var(--danger);" onclick="quitGame()">ÇIK</button>
     </div>
 </div>
 
@@ -500,16 +485,28 @@
             </button>
         </div>
         
-        <div class="progress-container">
+        <!-- Online Specific Header Info -->
+        <div id="online-info" class="progress-container hidden" style="flex-direction: row; gap: 15px; justify-content: center;">
+             <div class="score-box opponent">
+                 <div id="opp-avatar" style="font-size:1rem;">👤</div>
+                 <div id="opp-score">0</div>
+             </div>
+             <div style="font-weight:900; color:#b2bec3;">VS</div>
+             <div class="score-box">
+                 <div id="my-avatar" style="font-size:1rem;">😎</div>
+                 <div id="score-display-online">0</div>
+             </div>
+        </div>
+
+        <div id="solo-info" class="progress-container">
             <div class="level-badge" id="level-txt">Seviye 1</div>
             <div class="progress-track">
                 <div class="progress-fill" id="progress-bar"></div>
             </div>
-        </div>
-
-        <div class="score-box">
-            <div style="font-size:0.6rem; opacity:0.8;">PUAN</div>
-            <div id="score-display">0</div>
+            <div class="score-box" style="margin-top:5px;">
+                <div style="font-size:0.6rem; opacity:0.8;">PUAN</div>
+                <div id="score-display">0</div>
+            </div>
         </div>
     </div>
 
@@ -566,15 +563,6 @@
     </div>
 </div>
 
-<!-- VERSUS INTERSTITIAL MODAL -->
-<div id="versus-modal" class="modal-overlay hidden">
-    <div class="setup-card" style="max-width:400px;">
-        <h2 class="title">Sıra Diğerinde!</h2>
-        <p id="versus-msg" style="margin-bottom:20px; font-size:1.1rem; color:#636e72;">Sıra 2. Oyuncuda</p>
-        <button class="big-start-btn" onclick="startVersusRound2()">HAZIRIM!</button>
-    </div>
-</div>
-
 <!-- RESULT SCREEN -->
 <div id="result-screen" class="screen hidden">
     <canvas id="confetti-canvas" style="position:absolute; inset:0; pointer-events:none;"></canvas>
@@ -596,23 +584,27 @@
         </div>
     </div>
     
-    <!-- Versus Result Area -->
-    <div id="versus-result-area" class="hidden" style="width:100%; max-width:500px; margin-bottom:20px; z-index:10;">
+    <!-- Online Result Area -->
+    <div id="online-result-area" class="hidden" style="width:100%; max-width:500px; margin-bottom:20px; z-index:10;">
         <div style="display:flex; justify-content:space-around; align-items:center; background:#f8f9fa; padding:15px; border-radius:15px; border:2px solid #eee;">
              <div style="text-align:center;">
-                 <div id="res-p1-name" class="stat-label" style="color:var(--primary)">P1</div>
-                 <div id="res-p1-score" style="font-size:2rem; font-weight:800;">0</div>
+                 <div id="res-p1-avatar" style="font-size:2rem;">😎</div>
+                 <div id="res-p1-name" class="stat-label" style="color:var(--primary)">Sen</div>
+                 <div id="res-p1-score" style="font-size:1.5rem; font-weight:800;">0</div>
              </div>
              <div style="font-size:1.5rem; font-weight:900; color:#b2bec3;">VS</div>
              <div style="text-align:center;">
-                 <div id="res-p2-name" class="stat-label" style="color:var(--secondary)">P2</div>
-                 <div id="res-p2-score" style="font-size:2rem; font-weight:800;">0</div>
+                 <div id="res-p2-avatar" style="font-size:2rem;">👤</div>
+                 <div id="res-p2-name" class="stat-label" style="color:var(--secondary)">Rakip</div>
+                 <div id="res-p2-score" style="font-size:1.5rem; font-weight:800;">0</div>
              </div>
         </div>
-        <div id="winner-msg" style="margin-top:15px; font-size:1.5rem; font-weight:900; color:var(--success);">Kazanan: Sami!</div>
+        <div id="winner-msg" style="margin-top:15px; font-size:1.5rem; font-weight:900; color:var(--success);"></div>
+        <div id="rematch-status" style="margin-top:10px; color:#636e72; font-size:0.9rem; min-height:1.2rem;"></div>
     </div>
 
-    <button class="big-start-btn" style="max-width:300px; z-index:10; position:relative;" onclick="prepareGame('result-screen')">TEKRAR OYNA</button>
+    <button id="main-replay-btn" class="big-start-btn" style="max-width:300px; z-index:10; position:relative;" onclick="prepareGame('result-screen')">TEKRAR OYNA</button>
+    <button id="rematch-btn" class="big-start-btn hidden" style="max-width:300px; z-index:10; position:relative; background:var(--primary);" onclick="requestRematch()">TEKRAR YARIŞ</button>
     <button class="big-start-btn secondary-btn" style="max-width:300px; margin-top:10px; z-index:10; position:relative; background:white;" onclick="goHome()">ANA SAYFA</button>
 </div>
 
@@ -621,7 +613,7 @@
 <!-- Firebase Logic & Game Code -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-  import { getDatabase, ref, set, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+  import { getDatabase, ref, set, onValue, update, remove, get, onDisconnect } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyD4zIUFTJEzFrDc6UTKTRPFtAvsM3t97z0",
@@ -636,46 +628,37 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // Expose DB functions to window for global access
-  window.db = db;
-  window.ref = ref;
-  window.set = set;
-  window.onValue = onValue;
-  window.update = update;
-  window.remove = remove;
-  window.get = get;
+  // Global Access
+  window.db = db; window.ref = ref; window.set = set; window.onValue = onValue; window.update = update; window.remove = remove; window.get = get; window.onDisconnect = onDisconnect;
 
-  // --- OYUN AYARLARI VE DURUMU ---
+  // --- STATE ---
     let config = { diff: 1, ops: ['+', '-'], mode: 'time', device: 'tablet' };
     let state = { 
-        score: 0, 
-        time: 60, 
-        active: false, 
-        paused: false,
-        frozen: false,
-        currentQ: {}, 
-        input: '', 
-        streak: 0, 
-        correct: 0, 
-        wrong: 0,
-        passes: 3,
-        levelProgress: 0,
-        level: 1,
-        questionsAnswered: 0,
-        sessionTime: 0,
-        // Versus Mode State
-        versusTurn: 1,
-        p1Name: '', p2Name: '', p1Score: 0, p2Score: 0,
-        // Online Mode State
-        isOnline: false,
-        roomCode: null,
-        playerId: null, // 'p1' or 'p2'
-        opponentScore: 0
+        score: 0, time: 60, active: false, paused: false, frozen: false,
+        currentQ: {}, input: '', streak: 0, correct: 0, wrong: 0, passes: 3,
+        levelProgress: 0, level: 1, questionsAnswered: 0, sessionTime: 0,
+        // Identity
+        identity: { name: '', avatar: '😎' },
+        // Online Mode
+        isOnline: false, roomCode: null, playerId: null, opponentScore: 0,
+        opponentName: 'Rakip', opponentAvatar: '👤', isReady: false, opponentReady: false
     };
     let timerInterval;
     let stats = JSON.parse(localStorage.getItem('mathStats')) || { games: 0, best: 0, correct: 0, wrong: 0, totalSeconds: 0 };
     
-    // --- SES SİSTEMİ ---
+    // Check for existing identity
+    const savedId = localStorage.getItem('mathIdentity');
+    if(savedId) {
+        state.identity = JSON.parse(savedId);
+        document.getElementById('display-player-name').textContent = state.identity.name;
+        document.getElementById('identity-screen').classList.add('hidden'); // Fixed: changed intro-screen to identity-screen
+        document.getElementById('setup-screen').classList.remove('hidden');
+    } else {
+        // First run or cleared
+        document.getElementById('identity-screen').classList.remove('hidden'); // Fixed: changed intro-screen to identity-screen
+    }
+
+    // --- SOUND ---
     let soundEnabled = true;
     let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -715,7 +698,7 @@
         }
     }
 
-    // --- GLOBAL FUNCTIONS EXPORT ---
+    // --- GLOBAL FUNCTIONS ---
     window.toggleSound = function() {
         soundEnabled = !soundEnabled;
         document.getElementById('sound-icon').textContent = soundEnabled ? '🔊' : '🔇';
@@ -733,15 +716,30 @@
         }, 300);
     };
 
-    window.setDevice = function(dev, btn) {
-        playSound('click'); config.device = dev; document.body.className = `mode-${dev}`; updateBtnGroup(btn);
+    // --- IDENTITY LOGIC ---
+    window.selectAvatar = function(emoji, btn) {
+        state.identity.avatar = emoji;
+        document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+        btn.classList.add('selected');
+        playSound('click');
     };
+
+    window.saveIdentity = function() {
+        const name = document.getElementById('player-name-input').value.trim();
+        if(!name) return alert("Lütfen bir isim yaz!");
+        state.identity.name = name;
+        localStorage.setItem('mathIdentity', JSON.stringify(state.identity));
+        document.getElementById('display-player-name').textContent = name;
+        switchScreen('identity-screen', 'setup-screen');
+    };
+
+    // --- MENU LOGIC ---
+    window.setDevice = function(dev, btn) { playSound('click'); config.device = dev; document.body.className = `mode-${dev}`; updateBtnGroup(btn); };
 
     window.setMode = function(m, btn) {
         playSound('click'); config.mode = m; updateBtnGroup(btn);
         
-        // UI visibility
-        document.getElementById('versus-names').classList.add('hidden');
+        // Hide/Show Elements
         document.getElementById('online-lobby').classList.add('hidden');
         document.getElementById('diff-label').classList.remove('hidden');
         document.getElementById('diff-group').classList.remove('hidden');
@@ -749,12 +747,8 @@
         document.getElementById('op-group').classList.remove('hidden');
         document.getElementById('main-start-btn').classList.remove('hidden');
 
-        if (m === 'versus') {
-             document.getElementById('versus-names').classList.remove('hidden');
-        }
-        else if (m === 'online') {
+        if (m === 'online') {
              document.getElementById('online-lobby').classList.remove('hidden');
-             // Hide unnecessary options for lobby
              document.getElementById('diff-label').classList.add('hidden');
              document.getElementById('diff-group').classList.add('hidden');
              document.getElementById('op-label').classList.add('hidden');
@@ -767,7 +761,6 @@
         if(m === 'time') msg = "⏱️ En çok doğruyu 60 saniyede yapmaya çalış!";
         else if(m === 'count') msg = "📝 Stres yok! 20 soruyu kendi hızında çöz.";
         else if(m === 'survival') msg = "🔥 Her doğru ek süre verir, yanlış süreni götürür!";
-        else if(m === 'versus') msg = "👥 Arkadaşınla sıra ile yarış, en yüksek puanı topla!";
         else if(m === 'online') msg = "🌍 Odaya bağlan, rakibinle aynı anda yarış!";
         
         toast.textContent = msg; toast.classList.add('show');
@@ -788,7 +781,6 @@
         btn.classList.add('active');
     }
     
-    // --- HELPER FUNCTIONS ---
     function formatTime(seconds) {
         const h = Math.floor(seconds / 3600);
         const m = Math.floor((seconds % 3600) / 60);
@@ -799,32 +791,27 @@
 
     // --- ONLINE LOBBY LOGIC ---
     window.createRoom = function() {
-        const code = Math.floor(10000 + Math.random() * 90000); // 5 digit code
-        state.roomCode = code;
-        state.playerId = 'p1';
-        state.isOnline = true;
+        const code = Math.floor(10000 + Math.random() * 90000);
+        state.roomCode = code; state.playerId = 'p1'; state.isOnline = true;
+        state.isReady = false;
 
-        document.getElementById('join-area').classList.add('hidden');
-        document.getElementById('waiting-area').classList.remove('hidden');
-        document.getElementById('room-code-display').textContent = code;
-        document.getElementById('lobby-status-text').textContent = "Rakip Bekleniyor...";
-
-        // Set Initial DB State
+        // Reset Room
         set(ref(db, 'rooms/' + code), {
             status: 'waiting',
-            p1Score: 0,
-            p2Score: 0,
-            currentQuestion: null,
-            winner: null
+            players: {
+                p1: { name: state.identity.name, avatar: state.identity.avatar, ready: false, score: 0 },
+            },
+            currentQuestion: null, lastAnswerBy: null
         });
 
-        // Listen for changes
-        listenToRoom(code);
+        // Remove on disconnect
+        onDisconnect(ref(db, 'rooms/' + code)).remove();
+
+        enterReadyRoom(code);
     };
 
     window.showJoinInput = function() {
         document.getElementById('join-area').classList.remove('hidden');
-        document.getElementById('waiting-area').classList.add('hidden');
     };
 
     window.joinRoom = function() {
@@ -834,75 +821,232 @@
         get(ref(db, 'rooms/' + code)).then((snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
-                if(data.status === 'waiting') {
-                    state.roomCode = code;
-                    state.playerId = 'p2';
-                    state.isOnline = true;
+                if(data.status === 'waiting' && !data.players.p2) {
+                    state.roomCode = code; state.playerId = 'p2'; state.isOnline = true;
+                    state.isReady = false;
                     
-                    // Update room status to start
-                    update(ref(db, 'rooms/' + code), {
-                        status: 'playing'
+                    update(ref(db, 'rooms/' + code + '/players/p2'), {
+                        name: state.identity.name, avatar: state.identity.avatar, ready: false, score: 0
                     });
                     
-                    listenToRoom(code);
-                } else {
-                    alert("Oda dolu veya oyun başlamış!");
-                }
-            } else {
-                alert("Oda bulunamadı!");
-            }
+                    onDisconnect(ref(db, 'rooms/' + code + '/players/p2')).remove();
+
+                    enterReadyRoom(code);
+                } else { alert("Oda dolu veya oyun başlamış!"); }
+            } else { alert("Oda bulunamadı!"); }
         });
     };
 
-    function listenToRoom(code) {
+    function enterReadyRoom(code) {
+        switchScreen('setup-screen', 'ready-room');
+        document.getElementById('lobby-code-display').textContent = code;
+        listenToLobby(code);
+    }
+
+    function listenToLobby(code) {
         onValue(ref(db, 'rooms/' + code), (snapshot) => {
             const data = snapshot.val();
-            if(!data) return; // Room deleted
-
-            // Game Start
-            if(data.status === 'playing' && state.active === false) {
-                 if(state.playerId === 'p1') {
-                     // Host generates first question
-                     generateOnlineQuestion();
-                 }
-                 prepareGame('setup-screen'); // Navigate to ready
+            if(!data) {
+                if(state.isOnline && state.active) return; // Keep game running if active? No, room deleted
+                alert("Oda kapatıldı!"); window.goHome(); return;
             }
 
-            // Sync Scores
+            // Sync Players UI in Lobby
+            updatePlayerCard('p1', data.players?.p1);
+            updatePlayerCard('p2', data.players?.p2);
+
+            // Sync Game Start
+            if(data.status === 'playing' && !state.active) {
+                 // SYNC START
+                 startOnlineGame(data);
+            }
+
+            // Sync Game Data (Score & Q)
             if(state.active) {
-                if(state.playerId === 'p1') {
-                    state.opponentScore = data.p2Score || 0;
-                    state.score = data.p1Score || 0;
-                } else {
-                    state.opponentScore = data.p1Score || 0;
-                    state.score = data.p2Score || 0;
-                }
-                document.getElementById('score-display').textContent = state.score;
-            }
+                // Scores
+                const p1s = data.players.p1?.score || 0;
+                const p2s = data.players.p2?.score || 0;
+                
+                if(state.playerId === 'p1') { state.score = p1s; state.opponentScore = p2s; }
+                else { state.score = p2s; state.opponentScore = p1s; }
+                
+                document.getElementById('score-display-online').textContent = state.score;
+                document.getElementById('opp-score').textContent = state.opponentScore;
 
-            // Sync Question
-            if(data.currentQuestion) {
-                 // Check if it's a new question
-                 const qHash = data.currentQuestion.text;
-                 if(state.currentQ.text !== qHash) {
+                // Question Change
+                if(data.currentQuestion && data.currentQuestion.text !== state.currentQ.text) {
+                     // NEW QUESTION ARRIVED
                      state.currentQ = data.currentQuestion;
                      document.getElementById('q-text').textContent = state.currentQ.text;
                      document.getElementById('q-text').style.color = 'white';
-                     // Clear input
-                     state.input = '';
-                     updateInputDisplay();
-                     // Unfreeze if frozen
+                     state.input = ''; updateInputDisplay();
                      state.frozen = false;
                      document.getElementById('numpad-area').classList.remove('frozen-pad');
                      document.getElementById('q-container').classList.remove('shake');
-                 }
+                     
+                     // Did opponent solve it?
+                     if(data.lastAnswerBy && data.lastAnswerBy !== state.playerId) {
+                         showFeedback(`${state.opponentName} BİLDİ! 🚀`, 'warn');
+                         document.getElementById('game-area').classList.add('shake');
+                         setTimeout(()=>document.getElementById('game-area').classList.remove('shake'), 300);
+                     }
+                }
+            }
+            
+            // Rematch Logic
+            if(data.status === 'finished') {
+                const p1R = data.players.p1?.rematch;
+                const p2R = data.players.p2?.rematch;
+                
+                if(p1R && p2R) {
+                    // Both agreed
+                    if(state.playerId === 'p1') {
+                        // Host resets
+                        update(ref(db, 'rooms/' + code), {
+                            status: 'playing',
+                            'players/p1/score': 0, 'players/p1/rematch': null,
+                            'players/p2/score': 0, 'players/p2/rematch': null,
+                            lastAnswerBy: null
+                        });
+                        generateOnlineQuestion();
+                    }
+                } else if (!data.players.p1 || !data.players.p2) {
+                    document.getElementById('rematch-status').textContent = "Rakip ayrıldı...";
+                    document.getElementById('rematch-btn').classList.add('hidden');
+                } else if (p1R || p2R) {
+                     const who = p1R ? data.players.p1.name : data.players.p2.name;
+                     if((state.playerId === 'p1' && !p1R) || (state.playerId === 'p2' && !p2R)) {
+                         document.getElementById('rematch-status').textContent = `${who} tekrar istiyor!`;
+                     } else {
+                         document.getElementById('rematch-status').textContent = "Rakip bekleniyor...";
+                     }
+                }
             }
         });
     }
 
+    function updatePlayerCard(pid, pData) {
+        const elName = document.getElementById(pid + '-name');
+        const elStatus = document.getElementById(pid + '-status');
+        const elAvatar = document.getElementById(pid + '-avatar');
+        const card = document.getElementById(pid + '-card');
+
+        if(pData) {
+            elName.textContent = pData.name;
+            elAvatar.textContent = pData.avatar;
+            if(pData.ready) {
+                elStatus.innerHTML = '<span class="ready-badge">HAZIR</span>';
+                card.classList.add('ready');
+            } else {
+                elStatus.textContent = 'Bekliyor...';
+                card.classList.remove('ready');
+            }
+            
+            if(pid !== state.playerId) {
+                state.opponentName = pData.name;
+                state.opponentAvatar = pData.avatar;
+            }
+        } else {
+            elName.textContent = 'Bekleniyor...';
+            elStatus.textContent = 'Bağlantı Yok';
+            elAvatar.textContent = '👤';
+            card.classList.remove('ready');
+        }
+    }
+
+    window.toggleReady = function() {
+        state.isReady = !state.isReady;
+        const btn = document.getElementById('ready-btn');
+        if(state.isReady) {
+            btn.textContent = "HAZIRIM (İptal Et)";
+            btn.style.background = "var(--success)";
+            btn.style.color = "white";
+        } else {
+            btn.textContent = "HAZIR DEĞİLİM";
+            btn.style.background = "var(--light)";
+            btn.style.color = "var(--dark)";
+        }
+        
+        update(ref(db, 'rooms/' + state.roomCode + '/players/' + state.playerId), {
+            ready: state.isReady
+        });
+
+        // Host checks if start possible
+        // Actually, trigger via Cloud Function or Host Logic? Host Logic is simpler here.
+        if(state.playerId === 'p1') {
+             // Check self and opponent manually via snapshot or wait for listener
+             get(ref(db, 'rooms/' + state.roomCode + '/players')).then(snap => {
+                 const pl = snap.val();
+                 if(pl.p1?.ready && pl.p2?.ready) {
+                     // START GAME
+                     update(ref(db, 'rooms/' + state.roomCode), { status: 'playing' });
+                     generateOnlineQuestion();
+                 }
+             });
+        }
+    };
+
+    window.shareRoomCode = function() {
+        navigator.clipboard.writeText(state.roomCode.toString()).then(() => {
+            const fb = document.getElementById('copy-feedback');
+            fb.textContent = "Kopyalandı!";
+            setTimeout(() => fb.textContent = "", 2000);
+        });
+    };
+
+    function startOnlineGame(data) {
+        // Setup UI
+        switchScreen('ready-room', 'result-screen'); // Hack to clear
+        document.getElementById('result-screen').classList.add('hidden'); // Ensure hidden
+        
+        // Populate Header
+        document.getElementById('my-avatar').textContent = state.identity.avatar;
+        document.getElementById('opp-avatar').textContent = state.opponentAvatar;
+        document.getElementById('online-info').classList.remove('hidden');
+        document.getElementById('solo-info').classList.add('hidden');
+
+        // Start Countdown
+        const countEl = document.getElementById('countdown-overlay');
+        countEl.classList.remove('hidden');
+        let count = 3; countEl.textContent = count;
+        
+        let int = setInterval(() => {
+            count--;
+            if(count > 0) { countEl.textContent = count; playSound('click'); } 
+            else if (count === 0) { countEl.textContent = "BAŞLA!"; playSound('start'); } 
+            else { 
+                clearInterval(int); 
+                countEl.classList.add('hidden'); 
+                
+                // Actual Logic Start
+                state.active = true; state.time = 60; state.score = 0; state.opponentScore = 0;
+                document.getElementById('game-screen').classList.remove('hidden');
+                let modeIcon = '🌍';
+                document.getElementById('mode-icon-display').textContent = modeIcon;
+                
+                // Timer
+                if (timerInterval) clearInterval(timerInterval);
+                timerInterval = setInterval(() => {
+                    if (!state.active) return;
+                    state.time--;
+                    // Update Time UI
+                    const tDiv = document.getElementById('time-display');
+                    const tContainer = document.getElementById('timer-box');
+                    tDiv.textContent = state.time;
+                    tContainer.classList.remove('blink-slow', 'blink-fast');
+                    if (state.time <= 5) tContainer.classList.add('blink-fast');
+                    else if (state.time <= 10) tContainer.classList.add('blink-slow');
+                    
+                    if (state.time <= 0) {
+                        window.endGame();
+                        if(state.playerId === 'p1') update(ref(db, 'rooms/' + state.roomCode), { status: 'finished' });
+                    }
+                }, 1000);
+            }
+        }, 800);
+    }
+
     function generateOnlineQuestion() {
-        // Use existing generator logic but push to DB
-        // Simple Medium Difficulty for Online
         const ops = ['+', '-', '*', '/'];
         const op = ops[Math.floor(Math.random() * ops.length)];
         let n1, n2, ans, symbol = op;
@@ -917,32 +1061,21 @@
         });
     }
 
-    // --- GAME LOGIC ---
+    // --- GAME LOGIC (SHARED) ---
 
     window.prepareGame = function(fromId = 'setup-screen') {
-        if (config.mode === 'versus') {
-            state.p1Name = document.getElementById('p1-input').value || "1. Oyuncu";
-            state.p2Name = document.getElementById('p2-input').value || "2. Oyuncu";
-            state.versusTurn = 1;
-            document.getElementById('ready-title').textContent = `${state.p1Name} Hazır Mısın?`;
-        } else if (config.mode === 'online') {
-             document.getElementById('ready-title').textContent = "Rakip Bulundu!";
-        } else {
-             document.getElementById('ready-title').textContent = "Hazır Mısın?";
-        }
-        switchScreen(fromId, 'ready-screen');
+         // Setup Solo Game
+         document.getElementById('ready-title').textContent = "Hazır Mısın?";
+         switchScreen(fromId, 'ready-screen');
     };
 
     window.startCountdown = function() {
         playSound('click');
         document.getElementById('ready-screen').classList.add('hidden');
-        document.getElementById('versus-modal').classList.add('hidden');
         const countEl = document.getElementById('countdown-overlay');
         countEl.classList.remove('hidden');
         
-        let count = 3;
-        countEl.textContent = count;
-        
+        let count = 3; countEl.textContent = count;
         let int = setInterval(() => {
             count--;
             if(count > 0) { countEl.textContent = count; playSound('click'); } 
@@ -952,33 +1085,24 @@
     };
 
     window.startGameLogic = function() {
-        // Reset Logic
-        if(config.mode !== 'online') { // Online state managed by lobby
-            state.score = 0;
-            state.active = true;
-            state.time = config.mode === 'time' || config.mode === 'versus' ? 60 : 20;
-        } else {
-             state.active = true;
-             state.time = 60; // Fixed time for online
-        }
-        
+        state.score = 0; state.active = true;
+        state.time = config.mode === 'time' ? 60 : 20;
         state.paused = false; state.frozen = false;
         state.input = ''; state.streak = 0;
         state.correct = 0; state.wrong = 0; state.passes = 3;
-        state.levelProgress = 0; state.level = 1; state.questionsAnswered = 0; state.sessionTime = 0;
+        state.levelProgress = 0; state.level = 1; state.questionsAnswered = 0;
 
         document.getElementById('game-screen').classList.remove('hidden');
+        document.getElementById('online-info').classList.add('hidden');
+        document.getElementById('solo-info').classList.remove('hidden');
         
         let modeIcon = '⏱️';
         if(config.mode === 'survival') modeIcon = '🔥';
         if(config.mode === 'count') modeIcon = '📝';
-        if(config.mode === 'versus') modeIcon = '👥';
-        if(config.mode === 'online') modeIcon = '🌍';
         document.getElementById('mode-icon-display').textContent = modeIcon;
 
         updateUI(); window.updatePasUI(); window.updateProgressBar();
-        
-        if(config.mode !== 'online') window.nextQuestion();
+        window.nextQuestion();
         
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
@@ -993,7 +1117,7 @@
     };
 
     window.togglePause = function() {
-        if(!state.active || config.mode === 'online') return; // Cannot pause online
+        if(!state.active || config.mode === 'online') return;
         state.paused = !state.paused;
         const modal = document.getElementById('pause-modal');
         if(state.paused) modal.classList.remove('hidden');
@@ -1004,11 +1128,13 @@
         state.active = false;
         clearInterval(timerInterval);
         document.getElementById('pause-modal').classList.add('hidden');
-        if (config.mode !== 'versus' && config.mode !== 'online') window.saveSessionStats(); 
         
-        if(config.mode === 'online' && state.roomCode) {
-             // Leave room logic could go here
+        if(config.mode === 'online') {
+             // Clean disconnect
+             update(ref(db, 'rooms/' + state.roomCode + '/players/' + state.playerId), null);
              state.isOnline = false;
+        } else {
+             window.saveSessionStats();
         }
 
         window.goHome();
@@ -1023,47 +1149,26 @@
     };
 
     window.goHome = function() {
-        switchScreen('result-screen', 'setup-screen');
-        document.getElementById('game-screen').classList.add('hidden');
+        const screens = document.querySelectorAll('.screen');
+        screens.forEach(s => s.classList.add('hidden'));
+        document.getElementById('setup-screen').classList.remove('hidden');
         document.body.style.backgroundColor = "#fdfbf7";
     };
 
     window.nextQuestion = function() {
-        if(config.mode === 'online') return; // Online handled by DB listener
-
         state.input = ''; updateInputDisplay();
         const ops = config.ops;
         const op = ops[Math.floor(Math.random() * ops.length)];
         let n1, n2, ans, symbol = op;
         
-        // Difficulty Logic
-        if (op === '+') {
-            if (config.diff === 1) { n1 = r(15) + 1; n2 = r(10) + 1; } 
-            else if (config.diff === 2) { n1 = r(35) + 15; n2 = r(30) + 10; } 
-            else { n1 = r(150) + 50; n2 = r(150) + 20; }
-            ans = n1 + n2;
-        } else if (op === '-') {
-            if (config.diff === 1) { n1 = r(15) + 5; n2 = r(n1 - 1) + 1; } 
-            else if (config.diff === 2) { n1 = r(50) + 20; n2 = r(n1 - 10) + 5; } 
-            else { n1 = r(150) + 50; n2 = r(n1 - 20) + 10; }
-            ans = n1 - n2;
-        } else if (op === '*') {
-            symbol = 'x';
-            if (config.diff === 1) { n1 = r(4) + 2; n2 = r(9) + 1; } 
-            else if (config.diff === 2) { n1 = r(4) + 6; n2 = r(9) + 2; } 
-            else { n1 = r(15) + 10; n2 = r(4) + 2; }
-            ans = n1 * n2;
-        } else { 
-            symbol = '÷';
-             if (config.diff === 1) { ans = r(4) + 2; n2 = r(2) + 2; n1 = ans * n2; } 
-             else if (config.diff === 2) { ans = r(7) + 2; n2 = r(4) + 2; n1 = ans * n2; } 
-             else { ans = r(10) + 5; n2 = r(6) + 3; n1 = ans * n2; }
-        }
+        if (op === '+') { n1 = r(15*config.diff)+1; n2 = r(10*config.diff)+1; ans = n1+n2; } 
+        else if (op === '-') { n1 = r(15*config.diff)+5; n2 = r(n1-1)+1; ans = n1-n2; } 
+        else if (op === '*') { symbol = 'x'; n1 = r(4*config.diff)+2; n2 = r(9)+1; ans = n1*n2; } 
+        else { symbol = '÷'; ans = r(4*config.diff)+2; n2 = r(4)+2; n1 = ans*n2; }
 
         state.currentQ = { text: `${n1} ${symbol} ${n2}`, ans: ans };
-        const qEl = document.getElementById('q-text');
-        qEl.textContent = state.currentQ.text;
-        qEl.style.color = 'white'; 
+        document.getElementById('q-text').textContent = state.currentQ.text;
+        document.getElementById('q-text').style.color = 'white'; 
     };
 
     function r(max) { return Math.floor(Math.random() * max); }
@@ -1087,9 +1192,8 @@
         if (state.passes > 0) {
             playSound('pass'); state.passes--; state.streak = 0; updatePasUI();
             if(config.mode === 'online') {
-                 // In online, passing just creates new question without point
                  showFeedback("PAS GEÇTİN", "warn");
-                 generateOnlineQuestion();
+                 generateOnlineQuestion(); // Penalty: opponent gets new question too? Or just skip locally? For fair sync, must gen new for both.
             } else {
                  window.nextQuestion();
                  showFeedback("PAS GEÇTİN", "warn");
@@ -1115,7 +1219,7 @@
         if (val === state.currentQ.ans) {
             playSound('correct'); state.correct++; state.streak++; state.questionsAnswered++;
             
-            let basePoints = config.diff * 10;
+            let basePoints = config.mode === 'online' ? 10 : config.diff * 10;
             let multiplier = Math.min(Math.floor(state.streak / 3) + 1, 5);
             state.score += basePoints * multiplier;
 
@@ -1126,17 +1230,13 @@
             updateProgressBar();
 
             showFeedback("DOĞRU!", "success");
-            
             document.getElementById('q-container').classList.add('pop');
             setTimeout(()=>document.getElementById('q-container').classList.remove('pop'), 200);
-
             updateUI();
 
             if(config.mode === 'online') {
-                // Update DB score and Generate New Question
-                const updates = {};
-                updates[state.playerId + 'Score'] = state.score;
-                update(ref(db, 'rooms/' + state.roomCode), updates);
+                update(ref(db, 'rooms/' + state.roomCode + '/players/' + state.playerId), { score: state.score });
+                update(ref(db, 'rooms/' + state.roomCode), { lastAnswerBy: state.playerId });
                 generateOnlineQuestion();
             } else if (config.mode === 'count' && state.questionsAnswered >= 20) {
                 window.endGame();
@@ -1150,7 +1250,6 @@
             updateProgressBar();
 
             if (config.mode === 'survival') state.time = Math.max(0, state.time - 5);
-            
             window.handleWrongAnswer();
         }
     };
@@ -1171,7 +1270,6 @@
             document.getElementById('q-container').classList.remove('shake');
             document.getElementById('numpad-area').classList.remove('frozen-pad');
             if(config.mode !== 'online') window.nextQuestion();
-            // In online, we just unfreeze, the question remains until someone solves it or passes
         }, 2000); 
     };
 
@@ -1217,7 +1315,7 @@
     }
     
     window.saveSessionStats = function() {
-        if (config.mode === 'versus' || config.mode === 'online') return;
+        if (config.mode === 'online') return;
         stats.games++; stats.correct += state.correct; stats.wrong += state.wrong;
         stats.totalSeconds = (stats.totalSeconds || 0) + state.sessionTime;
         if (state.score > stats.best) {
@@ -1233,46 +1331,23 @@
         clearInterval(timerInterval);
         state.active = false;
         
-        if (config.mode === 'versus') {
-            if (state.versusTurn === 1) {
-                state.p1Score = state.score; state.versusTurn = 2;
-                document.getElementById('game-screen').classList.add('hidden');
-                document.getElementById('versus-modal').classList.remove('hidden');
-                document.getElementById('versus-msg').textContent = `Sıra ${state.p2Name}'da!`;
-                return;
-            } else {
-                state.p2Score = state.score;
-                switchScreen('game-screen', 'result-screen');
-                document.getElementById('result-title').textContent = "Düello Bitti!";
-                document.getElementById('stats-detail-grid').classList.add('hidden');
-                document.getElementById('versus-result-area').classList.remove('hidden');
-                document.getElementById('res-p1-name').textContent = state.p1Name;
-                document.getElementById('res-p1-score').textContent = state.p1Score;
-                document.getElementById('res-p2-name').textContent = state.p2Name;
-                document.getElementById('res-p2-score').textContent = state.p2Score;
-                
-                let winnerText = ""; let winnerColor = "var(--gold)";
-                if (state.p1Score > state.p2Score) winnerText = `Kazanan: ${state.p1Name}! 🏆`;
-                else if (state.p2Score > state.p1Score) winnerText = `Kazanan: ${state.p2Name}! 🏆`;
-                else { winnerText = "Berabere! 🤝"; winnerColor = "var(--dark)"; }
-                const winMsg = document.getElementById('winner-msg');
-                winMsg.textContent = winnerText; winMsg.style.color = winnerColor;
-                window.startConfetti();
-                document.getElementById('new-record-msg').classList.add('hidden');
-                document.getElementById('final-score').classList.add('hidden');
-                return;
-            }
-        } else if (config.mode === 'online') {
+        if (config.mode === 'online') {
              // Online Results
              switchScreen('game-screen', 'result-screen');
-             document.getElementById('result-title').textContent = "Oyun Bitti!";
+             document.getElementById('result-title').textContent = "Düello Bitti!";
              document.getElementById('stats-detail-grid').classList.add('hidden');
-             document.getElementById('versus-result-area').classList.remove('hidden');
+             document.getElementById('online-result-area').classList.remove('hidden');
+             document.getElementById('main-replay-btn').classList.add('hidden');
+             document.getElementById('rematch-btn').classList.remove('hidden');
+             document.getElementById('rematch-status').textContent = "";
              
              // In online, opponent score is in state
+             document.getElementById('res-p1-avatar').textContent = state.identity.avatar;
              document.getElementById('res-p1-name').textContent = "Sen";
              document.getElementById('res-p1-score').textContent = state.score;
-             document.getElementById('res-p2-name').textContent = "Rakip";
+             
+             document.getElementById('res-p2-avatar').textContent = state.opponentAvatar;
+             document.getElementById('res-p2-name').textContent = state.opponentName;
              document.getElementById('res-p2-score').textContent = state.opponentScore;
 
              let winnerText = "";
@@ -1290,20 +1365,21 @@
         switchScreen('game-screen', 'result-screen');
         document.getElementById('result-title').textContent = "Oyun Bitti!";
         document.getElementById('stats-detail-grid').classList.remove('hidden');
-        document.getElementById('versus-result-area').classList.add('hidden');
+        document.getElementById('online-result-area').classList.add('hidden');
+        document.getElementById('main-replay-btn').classList.remove('hidden');
+        document.getElementById('rematch-btn').classList.add('hidden');
         document.getElementById('final-score').classList.remove('hidden');
         document.getElementById('final-score').textContent = state.score;
         document.getElementById('final-correct').textContent = state.correct;
         document.getElementById('final-wrong').textContent = state.wrong;
     };
 
-    // --- UTILS ---
-    window.startVersusRound2 = function() {
-        document.getElementById('versus-modal').classList.add('hidden');
-        document.getElementById('ready-title').textContent = `${state.p2Name} Hazır Mısın?`;
-        document.getElementById('ready-screen').classList.remove('hidden');
+    window.requestRematch = function() {
+         document.getElementById('rematch-btn').classList.add('hidden');
+         document.getElementById('rematch-status').textContent = "Tekrar yarış isteği gönderildi...";
+         update(ref(db, 'rooms/' + state.roomCode + '/players/' + state.playerId), { rematch: true });
     };
-    
+
     window.showStats = function() {
         switchScreen('setup-screen', 'stats-screen');
         document.getElementById('stat-total-games').textContent = stats.games;
@@ -1358,7 +1434,7 @@
         "Bal petekleri altıgen şeklindedir çünkü en az balmumu ile en çok balı saklamanın yolu budur.",
         "9 ile çarpılan her sayının rakamları toplamı 9'un katıdır."
     ];
-    document.getElementById('daily-fact').textContent = facts[Math.floor(Math.random() * facts.length)];
+    // document.getElementById('daily-fact').textContent = facts[Math.floor(Math.random() * facts.length)]; // Removed intro screen element reference
 </script>
 </body>
 </html>
