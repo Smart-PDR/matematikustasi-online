@@ -88,6 +88,19 @@
             margin: 15px 0 8px; letter-spacing: 1px; display: block;
         }
 
+        /* Profile Header in Setup */
+        .profile-header {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            background: #f1f2f6; padding: 10px 20px; border-radius: 20px;
+            margin-bottom: 20px; border: 2px dashed #dfe6e9;
+        }
+        .edit-btn {
+            background: white; border: none; width: 30px; height: 30px; border-radius: 50%;
+            cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-size: 0.9rem;
+            display: flex; align-items: center; justify-content: center; transition: 0.2s;
+        }
+        .edit-btn:hover { transform: scale(1.1); color: var(--primary); }
+
         /* Buttons */
         .btn-group { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 10px; }
         .opt-btn {
@@ -271,7 +284,8 @@
 
         <input type="text" id="player-name-input" class="inp-text" placeholder="İsmin (Örn: Ali)" maxlength="12">
 
-        <button class="big-btn" onclick="saveIdentity()">DEVAM ET</button>
+        <button class="big-btn" onclick="saveIdentity()">KAYDET VE DEVAM ET</button>
+        <button class="big-btn btn-white" style="margin-top:10px;" onclick="cancelIdentity()">İPTAL</button>
     </div>
 </div>
 
@@ -279,7 +293,14 @@
 <div id="setup-screen" class="screen hidden">
     <div class="card">
         <h1>Matematik Ustası</h1>
-        <div style="font-weight:700; color:var(--primary); margin-bottom:15px;">Hoş geldin, <span id="display-name">Oyuncu</span>!</div>
+        
+        <div class="profile-header">
+            <span style="font-size:1.5rem;" id="display-avatar">😎</span>
+            <div style="font-weight:700; color:var(--primary); font-size:1.2rem;">
+                <span id="display-name">Oyuncu</span>
+            </div>
+            <button class="edit-btn" onclick="editProfile()" title="Profili Düzenle">✏️</button>
+        </div>
 
         <span class="section-title">Cihaz Modu</span>
         <div class="btn-group">
@@ -544,7 +565,7 @@
       qIndex: 0, currentQ: {}, input: '', 
       streak: 0,
       shieldActive: false,
-      doublePoints: false, // New Joker
+      doublePoints: false, 
       
       // Online
       isOnline: false, roomCode: null, role: null, // p1 (host), p2 (guest)
@@ -568,8 +589,7 @@
       const savedId = JSON.parse(localStorage.getItem('mu_id'));
       if(savedId) {
           state.identity = savedId;
-          document.getElementById('player-name-input').value = savedId.name;
-          document.getElementById('display-name').textContent = savedId.name;
+          updateProfileDisplay();
           showScreen('setup-screen');
       } else {
           showScreen('identity-screen');
@@ -579,6 +599,12 @@
           if(el.textContent === state.identity.avatar) el.classList.add('selected');
           else el.classList.remove('selected');
       });
+  }
+
+  function updateProfileDisplay() {
+      document.getElementById('display-name').textContent = state.identity.name;
+      document.getElementById('display-avatar').textContent = state.identity.avatar;
+      document.getElementById('player-name-input').value = state.identity.name;
   }
 
   /* --- AUDIO --- */
@@ -598,7 +624,9 @@
           gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.05);
           osc.start(now); osc.stop(now + 0.05);
       } else if (type === 'correct') {
-          osc.type = 'sine'; osc.frequency.setValueAtTime(500, now); osc.frequency.exponentialRampToValueAtTime(1000, now + 0.2);
+          // Dynamic Pitch based on streak
+          const pitch = 500 + (Math.min(state.streak, 10) * 100);
+          osc.type = 'sine'; osc.frequency.setValueAtTime(pitch, now); osc.frequency.exponentialRampToValueAtTime(pitch*2, now + 0.2);
           gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.3);
           osc.start(now); osc.stop(now + 0.3);
       } else if (type === 'wrong') {
@@ -631,12 +659,26 @@
   };
 
   /* --- SETTINGS --- */
+  window.editProfile = () => {
+      // Re-populate identity screen with current data
+      document.getElementById('player-name-input').value = state.identity.name;
+      document.querySelectorAll('.avatar-opt').forEach(el => {
+          if(el.textContent === state.identity.avatar) el.classList.add('selected');
+          else el.classList.remove('selected');
+      });
+      showScreen('identity-screen');
+  };
+
   window.saveIdentity = () => {
       const name = document.getElementById('player-name-input').value.trim() || "Oyuncu";
       state.identity.name = name;
       localStorage.setItem('mu_id', JSON.stringify(state.identity));
-      document.getElementById('display-name').textContent = name;
+      updateProfileDisplay();
       showScreen('setup-screen');
+  };
+
+  window.cancelIdentity = () => {
+      showScreen('setup-screen'); // Just go back without saving
   };
 
   window.selectAvatar = (av, btn) => {
@@ -742,7 +784,6 @@
           }
           
           updateLobbyUI(data.players);
-          // NEW: Update Lobby Settings Display
           updateLobbySettings(data.config);
 
           if(state.role === 'p1' && data.status === 'waiting' && data.players?.p1?.ready && data.players?.p2?.ready) {
@@ -751,6 +792,10 @@
           }
           
           if(data.status === 'playing' && !state.active) { startOnlineGame(data.config.time); }
+          
+          /* CRITICAL FIX: Handle 'finished' state even if local state.active is false */
+          if(data.status === 'finished') { endGameOnline(false); return; }
+          
           if(state.active) { handleGameSync(data); }
       });
   }
@@ -862,7 +907,10 @@
   function gameLoop() {
       if(state.paused) return;
       if(config.mode === 'count') { state.time++; document.getElementById('timer-display').textContent = state.time; } 
-      else { state.time--; document.getElementById('timer-display').textContent = state.time; if(state.time <= 0) endGame(); }
+      else { 
+          state.time--; document.getElementById('timer-display').textContent = state.time; 
+          if(state.time <= 0) endGame(); 
+      }
   }
 
   window.nextQuestion = () => {
@@ -1000,7 +1048,6 @@
       if(data.reaction && data.reaction.ts > lastReactTime && data.reaction.from !== state.role) {
           lastReactTime = data.reaction.ts; showFloatingEmoji(data.reaction.emoji);
       }
-      if(data.status === 'finished') { endGameOnline(false); }
   }
 
   /* --- POWERUPS --- */
@@ -1040,12 +1087,19 @@
   }
 
   function endGame() {
-      stopGame();
-      if(state.isOnline) { update(ref(db, 'rooms/' + state.roomCode), { status: 'finished' }); } else { showResultsSolo(); }
+      // Don't stop game immediately for online, let the update propagate
+      if(state.isOnline) { 
+          update(ref(db, 'rooms/' + state.roomCode), { status: 'finished' });
+          // Stop timer locally to prevent multiple triggers
+          clearInterval(gameTimer);
+      } else { 
+          stopGame();
+          showResultsSolo(); 
+      }
   }
 
   function endGameOnline(abrupt) {
-      stopGame();
+      stopGame(); // NOW we stop everything safely
       showScreen('result-screen');
       document.getElementById('solo-stats').classList.add('hidden');
       document.getElementById('online-stats').classList.remove('hidden');
@@ -1064,6 +1118,7 @@
       if(abrupt) {
           title.textContent = "Rakip Ayrıldı"; msg.textContent = "Hükmen Galipsin!"; btn.classList.add('hidden');
       } else {
+          title.textContent = "Oyun Bitti!";
           btn.classList.remove('hidden');
           if(state.score > state.oppScore) { msg.textContent = "KAZANDIN! 🎉"; startConfetti(); playSound('win'); } 
           else if (state.score < state.oppScore) { msg.textContent = "Kaybettin..."; msg.style.color = "var(--danger)"; } 
