@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
     <title>Matematik Ustası | Ultimate</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;900&family=Fira+Code:wght@500&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-gradient: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
@@ -38,11 +38,15 @@
         body.mode-tablet { --btn-size: 70px; --font-scale: 1; --pad: 20px; }
         body.mode-board { --btn-size: 90px; --font-scale: 1.3; --pad: 30px; }
 
-        .sami-g-signature {
-            position: fixed; bottom: 10px; right: 15px;
-            font-size: 0.7rem; color: rgba(0,0,0,0.2);
-            z-index: 9999; pointer-events: none; text-align: right;
+        /* Developer Signature */
+        .dev-signature {
+            position: fixed; bottom: 15px; right: 20px;
+            font-family: 'Fira Code', monospace; font-size: 0.8rem;
+            color: rgba(0,0,0,0.4); text-align: right; pointer-events: none; z-index: 9999;
+            background: rgba(255,255,255,0.3); padding: 5px 10px; border-radius: 10px;
+            backdrop-filter: blur(2px); border: 1px solid rgba(255,255,255,0.2);
         }
+        .dev-signature strong { font-weight: 700; color: var(--primary); }
 
         /* Sound Toggle */
         .sound-toggle {
@@ -211,6 +215,7 @@
             background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px;
             font-weight: 700; font-size: 1.2rem; z-index: 3000; pointer-events: none;
             animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            white-space: nowrap;
         }
         @keyframes popIn { from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
 
@@ -226,7 +231,9 @@
 <body class="mode-tablet">
 
 <!-- Signature -->
-<div class="sami-g-signature">Designed for<br><strong>Kids & Pros</strong></div>
+<div class="dev-signature">
+    &lt; <strong>Sami GÜREVİN</strong> /&gt;
+</div>
 
 <button class="sound-toggle" onclick="toggleSound()">
     <span id="sound-icon">🔊</span>
@@ -464,7 +471,7 @@
         </div>
         
         <button id="btn-rematch" class="big-btn btn-blue hidden" onclick="requestRematch()">TEKRAR YARIŞ</button>
-        <button class="big-btn btn-white" style="margin-top:10px;" onclick="goHome()">ANA SAYFA</button>
+        <button id="btn-res-home" class="big-btn btn-white" style="margin-top:10px;" onclick="goHome()">ANA SAYFA</button>
         <div id="rematch-status" style="margin-top:10px; font-size:0.8rem; color:#636e72; min-height:1rem;"></div>
     </div>
 </div>
@@ -877,9 +884,11 @@
       // Get opponent name
       get(ref(db, 'rooms/' + state.roomCode + '/players')).then(snap => {
           const pl = snap.val();
-          const oppRole = state.role === 'p1' ? 'p2' : 'p1';
-          state.oppName = pl[oppRole].name;
-          document.getElementById('enemy-name').textContent = state.oppName;
+          if(pl) {
+              const oppRole = state.role === 'p1' ? 'p2' : 'p1';
+              state.oppName = pl[oppRole] ? pl[oppRole].name : 'Rakip';
+              document.getElementById('enemy-name').textContent = state.oppName;
+          }
       });
 
       startCountdown(() => {
@@ -1016,7 +1025,7 @@
           
           if(config.mode === 'survival') state.time += 3;
           
-          showToast("DOĞRU! " + (state.streak > 1 ? `x${state.streak}` : ""));
+          showToast("DOĞRU! ✅");
           
           // Online Sync
           if(state.isOnline) {
@@ -1123,7 +1132,7 @@
           
           // Did opponent answer?
           if(data.lastAnswerBy && data.lastAnswerBy !== state.role) {
-              showToast(`${state.oppName} BİLDİ!`);
+              showToast(`${state.oppName} BİLDİ! 🚀`);
           }
       }
       
@@ -1228,11 +1237,15 @@
       const title = document.getElementById('res-title');
       const msg = document.getElementById('res-msg');
       const btn = document.getElementById('btn-rematch');
+      const btnHome = document.getElementById('btn-res-home');
       
       if(abrupt) {
           title.textContent = "Rakip Ayrıldı";
           msg.textContent = "Hükmen Galipsin!";
-          btn.classList.add('hidden');
+          btn.classList.add('hidden'); // Hide rematch
+          // Ensure Home button is visible and active
+          btnHome.classList.remove('hidden');
+          btnHome.style.pointerEvents = "auto";
       } else {
           btn.classList.remove('hidden');
           if(state.score > state.oppScore) {
