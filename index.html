@@ -3,634 +3,488 @@
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
-    <title>Matematik Ustası | Pro Online</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <title>Matematik Ustası | Ultimate</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-start: #fdfbf7;
+            --bg-gradient: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
             --primary: #6c5ce7;
             --secondary: #00cec9;
-            --accent: #fd79a8;
+            --accent: #ff7675;
             --dark: #2d3436;
             --light: #dfe6e9;
+            --white: #ffffff;
             --success: #00b894;
             --danger: #d63031;
-            --gold: #fab1a0;
-            --warn: #ffeaa7;
-            --pas-color: #e17055;
-            --ice: #74b9ff;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--bg-start);
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg-gradient);
             color: var(--dark);
             height: 100vh;
             width: 100vw;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            transition: background 1s ease;
         }
 
-        /* DEVICE MODES CSS VARIABLES */
-        body.mode-phone { --btn-size: 55px; --font-base: 16px; --numpad-gap: 8px; }
-        body.mode-tablet { --btn-size: 75px; --font-base: 20px; --numpad-gap: 12px; }
-        body.mode-board { --btn-size: 100px; --font-base: 28px; --numpad-gap: 20px; }
+        /* DEVICE MODES */
+        body.mode-phone { --btn-size: 50px; --font-scale: 0.8; --pad: 10px; }
+        body.mode-tablet { --btn-size: 70px; --font-scale: 1; --pad: 20px; }
+        body.mode-board { --btn-size: 90px; --font-scale: 1.3; --pad: 30px; }
 
-        /* Sami G. Signature */
         .sami-g-signature {
-            position: fixed; bottom: 15px; right: 20px;
-            font-size: 0.8rem; color: rgba(0,0,0,0.3);
-            z-index: 9999; pointer-events: none; text-align: right; line-height: 1.2;
-            font-family: 'Poppins', sans-serif;
+            position: fixed; bottom: 10px; right: 15px;
+            font-size: 0.7rem; color: rgba(0,0,0,0.2);
+            z-index: 9999; pointer-events: none; text-align: right;
         }
-        .sami-g-signature strong { font-size: 1rem; color: rgba(0,0,0,0.5); font-weight: 800; }
 
-        /* Sound Toggle Button */
+        /* Sound Toggle */
         .sound-toggle {
             position: fixed; top: 15px; right: 15px;
-            background: white; border: 2px solid var(--light); border-radius: 50%;
-            width: 40px; height: 40px; display: flex; justify-content: center; align-items: center;
-            font-size: 1.2rem; cursor: pointer; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            transition: 0.2s;
+            background: var(--white); border-radius: 50%;
+            width: 45px; height: 45px; display: flex; justify-content: center; align-items: center;
+            font-size: 1.2rem; cursor: pointer; z-index: 2000; box-shadow: var(--shadow);
+            border: 2px solid var(--light); transition: 0.2s;
         }
         .sound-toggle:active { transform: scale(0.9); }
 
-        /* Screens & Transitions */
+        /* Screens */
         .screen {
-            position: fixed; inset: 0; background: white; z-index: 10;
+            position: fixed; inset: 0; z-index: 10;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 20px; overflow-y: auto; 
-            opacity: 1; transition: opacity 0.4s ease-in-out;
+            padding: var(--pad); overflow-y: auto; transition: opacity 0.3s ease;
+            backdrop-filter: blur(5px);
         }
         .hidden { display: none !important; opacity: 0; pointer-events: none; }
-        .fade-out { opacity: 0; pointer-events: none; }
-
-        /* Setup Screen & Cards */
-        .setup-card {
-            background: #fff; padding: 25px; border-radius: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.1); width: 100%; max-width: 600px; text-align: center;
-            border: 4px solid var(--light);
-            max-height: 95vh; overflow-y: auto; position: relative;
-        }
-        .title { font-size: 2.2rem; font-weight: 900; color: var(--primary); margin-bottom: 10px; letter-spacing: -1px; }
         
-        .section-label { font-weight: 700; color: #b2bec3; display: block; margin: 12px 0 6px; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; }
+        /* Cards */
+        .card {
+            background: var(--card-bg); padding: 25px; border-radius: 30px;
+            box-shadow: var(--shadow); width: 100%; max-width: 550px; text-align: center;
+            border: 4px solid var(--white); position: relative;
+            max-height: 95vh; overflow-y: auto;
+        }
+
+        h1, h2 { font-family: 'Fredoka', sans-serif; color: var(--primary); margin-bottom: 15px; line-height: 1.1; }
+        h1 { font-size: calc(2.2rem * var(--font-scale)); }
+        h2 { font-size: calc(1.8rem * var(--font-scale)); }
+
+        .section-title {
+            font-size: 0.9rem; font-weight: 800; color: #b2bec3; text-transform: uppercase;
+            margin: 15px 0 8px; letter-spacing: 1px; display: block;
+        }
+
+        /* Buttons */
+        .btn-group { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 10px; }
+        .opt-btn {
+            flex: 1; min-width: 80px; padding: 12px 5px; border: 2px solid var(--light);
+            background: var(--white); border-radius: 15px; font-weight: 700; cursor: pointer;
+            transition: 0.2s; color: var(--dark); font-size: 0.9rem; font-family: 'Nunito', sans-serif;
+        }
+        .opt-btn.active { background: var(--primary); color: white; border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3); }
+
+        .big-btn {
+            width: 100%; padding: 16px; background: var(--success); color: white;
+            border: none; border-radius: 20px; font-size: 1.3rem; font-weight: 800;
+            margin-top: 20px; cursor: pointer; box-shadow: 0 6px 0 #009476; transition: 0.1s;
+            font-family: 'Fredoka', sans-serif;
+        }
+        .big-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #009476; }
+        .btn-red { background: var(--danger); box-shadow: 0 6px 0 #c0392b; }
+        .btn-red:active { box-shadow: 0 2px 0 #c0392b; }
+        .btn-blue { background: #0984e3; box-shadow: 0 6px 0 #006eb3; }
+        .btn-blue:active { box-shadow: 0 2px 0 #006eb3; }
+        .btn-white { background: var(--white); color: var(--dark); box-shadow: 0 6px 0 #b2bec3; border: 2px solid var(--light); }
+        .btn-white:active { box-shadow: 0 2px 0 #b2bec3; }
+
+        /* Identity */
+        .avatar-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 20px 0; }
+        .avatar-opt { font-size: 2.2rem; cursor: pointer; padding: 5px; border-radius: 12px; transition: 0.2s; border: 2px solid transparent; }
+        .avatar-opt:hover { background: #f1f2f6; }
+        .avatar-opt.selected { background: var(--warn); border-color: var(--accent); transform: scale(1.1); }
         
-        .btn-group { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-        .setup-btn {
-            flex: 1; min-width: 70px; padding: 10px; border: 2px solid var(--light);
-            background: white; border-radius: 12px; font-weight: 700; cursor: pointer;
-            transition: 0.2s; font-family: inherit; color: var(--dark); font-size: 0.9rem;
+        .inp-text {
+            width: 100%; padding: 15px; border: 3px solid var(--light); border-radius: 15px;
+            font-family: 'Nunito', sans-serif; font-size: 1.2rem; text-align: center; font-weight: 800;
+            outline: none; transition: 0.3s;
         }
-        .setup-btn.active { background: var(--primary); color: white; border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3); }
+        .inp-text:focus { border-color: var(--primary); background: #f8f7ff; }
 
-        .big-start-btn {
-            width: 100%; padding: 18px; background: var(--success); color: white;
-            border: none; border-radius: 18px; font-size: 1.4rem; font-weight: 800;
-            margin-top: 20px; cursor: pointer; box-shadow: 0 6px 0 #00a884; transition: 0.1s;
+        /* Online Lobby */
+        .lobby-code-box {
+            background: #f1f2f6; padding: 15px; border-radius: 20px; margin: 15px 0;
+            border: 3px dashed #b2bec3; display: flex; align-items: center; justify-content: center; gap: 15px;
+            cursor: pointer; position: relative;
         }
-        .big-start-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #00a884; }
+        .lobby-code { font-size: 3rem; font-weight: 900; color: var(--primary); letter-spacing: 5px; font-family: 'Fredoka', sans-serif; }
+        .copy-icon { background: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
-        .secondary-btn {
-            background: var(--light); color: var(--dark); box-shadow: 0 6px 0 #b2bec3;
+        .player-list { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+        .player-row {
+            background: white; border: 2px solid var(--light); padding: 10px 15px; border-radius: 15px;
+            display: flex; align-items: center; gap: 15px;
         }
-        .secondary-btn:active { box-shadow: 0 2px 0 #b2bec3; }
+        .player-row.ready { border-color: var(--success); background: #e3fcf7; }
+        .p-avatar { font-size: 2rem; }
+        .p-name { flex: 1; text-align: left; font-weight: 800; font-size: 1.1rem; }
+        .p-status { font-size: 0.8rem; font-weight: 700; color: #b2bec3; }
+        .badge-ready { background: var(--success); color: white; padding: 3px 10px; border-radius: 10px; font-size: 0.7rem; }
 
-        /* Online Mode UI */
-        .online-lobby {
-            display: flex; flex-direction: column; gap: 10px; margin-top: 15px; width: 100%;
-        }
-        .room-code-container {
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            background: #f1f2f6; padding: 15px; border-radius: 15px; margin: 10px 0;
-            border: 2px dashed #b2bec3; cursor: pointer;
-        }
-        .room-code-display {
-            font-size: 3rem; font-weight: 900; color: var(--primary); letter-spacing: 5px;
-        }
-        .share-btn {
-            background: white; border: none; width: 50px; height: 50px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-size: 1.5rem;
-        }
-        
-        .player-card {
-            background: white; border: 3px solid var(--light); padding: 15px; border-radius: 15px;
-            display: flex; align-items: center; gap: 15px; margin-bottom: 10px; transition: 0.3s;
-        }
-        .player-card.ready { border-color: var(--success); background: #e6fffa; }
-        .player-avatar { font-size: 2.5rem; }
-        .player-info { text-align: left; flex: 1; }
-        .player-name { font-weight: 800; font-size: 1.1rem; }
-        .player-status { font-size: 0.8rem; font-weight: 600; color: #b2bec3; }
-        .ready-badge { background: var(--success); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; }
-
-        /* Identity Screen */
-        .avatar-grid {
-            display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 15px 0;
-        }
-        .avatar-option {
-            font-size: 2rem; cursor: pointer; padding: 5px; border-radius: 10px; border: 2px solid transparent; transition: 0.2s;
-        }
-        .avatar-option.selected { background: var(--warn); border-color: var(--gold); transform: scale(1.1); }
-        .name-input {
-            width: 100%; padding: 15px; border: 2px solid var(--light); border-radius: 15px;
-            font-family: inherit; font-size: 1.2rem; text-align: center; font-weight: 700;
-        }
-
-        /* Mode Explanation Toast */
-        .mode-toast {
-            background: var(--dark); color: white; padding: 8px 16px; border-radius: 20px;
-            font-size: 0.85rem; margin-top: 10px; opacity: 0; transition: opacity 0.3s;
-            position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 400px; pointer-events: none; z-index: 20;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        .mode-toast.show { opacity: 1; }
-
-        /* Stats Bar (Top) */
+        /* Game UI */
         #game-header {
-            display: grid; grid-template-columns: auto 1fr auto; gap: 15px; align-items: center;
-            padding: 10px 15px; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px);
-            border-bottom: 2px solid rgba(0,0,0,0.05); height: 90px; width: 100%; z-index: 5;
+            display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 600px;
+            margin: 0 auto 10px; padding: 10px; background: rgba(255,255,255,0.8); border-radius: 20px;
         }
-        .header-controls { display: flex; gap: 10px; }
+        .score-pill {
+            background: var(--white); padding: 5px 15px; border-radius: 15px;
+            display: flex; flex-direction: column; align-items: center; min-width: 80px;
+            box-shadow: 0 4px 0 #dfe6e9; border: 1px solid #dfe6e9;
+        }
+        .score-pill.enemy { background: #ffeaa7; border-color: #fdcb6e; box-shadow: 0 4px 0 #fdcb6e; }
+        .pill-label { font-size: 0.7rem; font-weight: 700; color: #636e72; }
+        .pill-val { font-size: 1.4rem; font-weight: 900; color: var(--dark); line-height: 1; }
+
+        #q-area { position: relative; margin: 10px 0; width: 100%; max-width: 450px; text-align: center; }
+        .q-card {
+            background: var(--dark); color: white; padding: 20px; border-radius: 30px;
+            box-shadow: 0 10px 25px rgba(45, 52, 54, 0.4); margin-bottom: 15px;
+            transition: transform 0.2s; position: relative; overflow: hidden;
+        }
+        .q-text { font-size: 3.5rem; font-weight: 900; font-family: 'Fredoka', sans-serif; letter-spacing: 2px; }
+        .ans-preview {
+            height: 50px; background: rgba(255,255,255,0.1); border-radius: 15px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; font-weight: 700; color: var(--secondary); margin-top: 10px;
+            border: 2px dashed rgba(255,255,255,0.2);
+        }
         
-        .modern-icon-btn { 
-            width: 45px; height: 45px; border-radius: 15px; border: none; font-size: 1.2rem; 
-            cursor: pointer; background: white; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 0 var(--light); color: var(--dark); transition: 0.1s; border: 1px solid var(--light);
+        /* Powerups */
+        .powerup-bar { display: flex; gap: 10px; justify-content: center; margin-bottom: 10px; }
+        .pu-btn {
+            width: 50px; height: 50px; border-radius: 15px; border: none; font-size: 1.5rem;
+            background: white; box-shadow: 0 4px 0 #b2bec3; cursor: pointer; position: relative;
+            display: flex; align-items: center; justify-content: center; transition: 0.2s;
         }
-        .modern-icon-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--light); }
-        .modern-icon-btn svg { width: 20px; height: 20px; fill: currentColor; }
-
-        .progress-container { width: 100%; display: flex; flex-direction: column; align-items: center; }
-        .progress-track { width: 100%; max-width: 300px; height: 12px; background: #dfe6e9; border-radius: 10px; overflow: hidden; position: relative; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--secondary), var(--primary)); width: 0%; transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .level-badge { font-size: 0.75rem; font-weight: 800; color: var(--primary); margin-bottom: 2px; }
-
-        .score-box { 
-            background: var(--primary); color: white; padding: 5px 10px; border-radius: 10px; 
-            font-weight: 800; font-size: 1.2rem; min-width: 70px; text-align: center;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .score-box.opponent { background: var(--secondary); opacity: 0.8; transform: scale(0.9); }
-
-        /* Main Game Area */
-        #game-area {
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            width: 100%; max-width: 800px; margin: 0 auto; padding: 10px; position: relative;
+        .pu-btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 #b2bec3; }
+        .pu-btn:disabled { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; transform: none; box-shadow: none; border: 1px solid #ddd; }
+        .pu-badge { 
+            position: absolute; top: -5px; right: -5px; background: var(--danger); color: white; 
+            font-size: 0.7rem; width: 18px; height: 18px; border-radius: 50%; font-weight: 800;
+            display: flex; align-items: center; justify-content: center; 
         }
 
-        .question-container {
-            background: var(--dark); color: white; padding: 15px 30px; border-radius: 30px;
-            margin-bottom: 15px; text-align: center; position: relative;
-            box-shadow: 0 15px 40px rgba(45, 52, 54, 0.3);
-            transform: scale(1); transition: transform 0.2s;
-            width: 90%; max-width: 500px;
+        /* Numpad */
+        .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 400px; margin: 0 auto; }
+        .num-btn {
+            height: var(--btn-size); background: white; border-radius: 18px; border: none;
+            font-size: 1.8rem; font-weight: 700; color: var(--dark); cursor: pointer;
+            box-shadow: 0 5px 0 var(--light); transition: 0.1s;
         }
-        .question-text { font-size: 3rem; font-weight: 800; letter-spacing: 2px; line-height: 1.2; }
+        .num-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--light); }
+        .num-btn.del { background: var(--accent); color: white; box-shadow: 0 5px 0 #e17055; font-size: 1.2rem; }
+        .num-btn.pas { background: #fab1a0; color: white; box-shadow: 0 5px 0 #e17055; font-size: 1rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
         
-        .answer-preview {
-            height: 50px; margin-top: 10px; background: rgba(255,255,255,0.15);
-            border-radius: 15px; display: flex; align-items: center; justify-content: center;
-            font-size: 2.2rem; font-weight: 700; color: #81ecec; border: 2px dashed rgba(255,255,255,0.3);
+        /* Reactions */
+        .reaction-bar { display: flex; gap: 8px; justify-content: center; margin-top: 15px; }
+        .react-btn {
+            background: rgba(255,255,255,0.8); border: none; border-radius: 50%;
+            width: 45px; height: 45px; font-size: 1.4rem; cursor: pointer; transition: 0.2s;
         }
-
-        .streak-container {
-            position: absolute; top: -15px; right: -5px; background: var(--accent);
-            color: white; padding: 4px 12px; border-radius: 20px; font-weight: 800;
-            font-size: 0.8rem; transform: rotate(10deg); opacity: 0; transition: 0.3s;
-            box-shadow: 0 5px 15px rgba(253, 121, 168, 0.4); pointer-events: none;
-        }
-        .streak-active { opacity: 1; animation: bounce 0.5s infinite alternate; }
-
-        .numpad {
-            display: grid; grid-template-columns: repeat(3, 1fr);
-            gap: var(--numpad-gap); width: 100%; max-width: 450px; transition: 0.3s;
-        }
-        .numpad.frozen-pad { opacity: 0.4; filter: grayscale(1); pointer-events: none; transform: scale(0.98); }
-
-        .btn {
-            height: var(--btn-size); border: none; border-radius: 18px;
-            font-size: calc(var(--font-base) * 1.5); font-weight: 700; cursor: pointer;
-            background: white; color: var(--dark); box-shadow: 0 5px 0 var(--light);
-            transition: 0.1s; display: flex; align-items: center; justify-content: center;
-        }
-        .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--light); background: #f1f2f6; }
-        
-        .btn-del { background: var(--danger); color: white; box-shadow: 0 5px 0 #c0392b; font-size: 1rem; font-weight: 800; letter-spacing: 1px; }
-        .btn-del:active { box-shadow: 0 2px 0 #c0392b; }
-
-        .btn-pas { background: var(--pas-color); color: white; box-shadow: 0 5px 0 #bf5e46; font-size: 1rem; flex-direction: column; line-height: 1; gap: 4px; }
-        .btn-pas:active { box-shadow: 0 2px 0 #bf5e46; }
-        .pas-dots { display: flex; gap: 3px; }
-        .pas-dot { width: 6px; height: 6px; background: rgba(255,255,255,0.4); border-radius: 50%; }
-        .pas-dot.active { background: white; }
-
-        .submit-area { width: 100%; max-width: 450px; display: grid; grid-template-columns: 1fr; margin-top: 15px; }
-        .btn-submit { 
-            background: var(--success); color: white; height: 65px; border-radius: 20px;
-            font-size: 1.8rem; font-weight: 800; border: none; box-shadow: 0 6px 0 #009476; cursor: pointer;
-        }
-        .btn-submit:active { transform: translateY(4px); box-shadow: 0 2px 0 #009476; }
-
-        /* Reaction Bar */
-        .reaction-bar {
-            display: flex; gap: 10px; margin-top: 10px; justify-content: center;
-            width: 100%; max-width: 400px;
-        }
-        .reaction-btn {
-            background: white; border: 2px solid var(--light); border-radius: 12px;
-            width: 45px; height: 45px; font-size: 1.5rem; cursor: pointer;
-            transition: 0.2s; display: flex; align-items: center; justify-content: center;
-        }
-        .reaction-btn:active { transform: scale(0.9); }
-
-        .floating-emoji {
-            position: absolute; font-size: 4rem; pointer-events: none; z-index: 100;
-            animation: floatUp 2s forwards; left: 50%; top: 50%;
-        }
-        @keyframes floatUp {
-            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-            100% { opacity: 0; transform: translate(-50%, -150%) scale(1); }
-        }
+        .react-btn:hover { transform: scale(1.1); background: white; }
+        .react-btn:disabled { opacity: 0.3; cursor: wait; }
 
         /* Effects */
-        .overlay-msg {
-            position: fixed; top: 60%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 3.5rem; font-weight: 900; color: var(--success); text-shadow: 0 5px 20px rgba(255,255,255,0.2);
-            z-index: 100; pointer-events: none; opacity: 0; background: rgba(255,255,255,0.4);
-            padding: 10px 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); white-space: nowrap;
+        .floating-emoji {
+            position: fixed; font-size: 4rem; pointer-events: none; z-index: 2000;
+            animation: floatUp 2s forwards; left: 50%; top: 70%;
         }
-        .fade-up { animation: fadeUp 1s forwards; }
-        @keyframes fadeUp { 0% { opacity: 0; transform: translate(-50%, -20%) scale(0.8); } 20% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.1); } 80% { opacity: 0.9; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -80%); } }
+        @keyframes floatUp { 0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); } 20% { opacity: 1; transform: translate(-50%, -50px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -200px) scale(1); } }
 
-        .blink-slow { animation: blinkAnim 1s infinite; color: var(--danger) !important; }
-        .blink-fast { animation: blinkAnim 0.3s infinite; color: var(--danger) !important; font-weight: 900; transform: scale(1.1); }
-        @keyframes blinkAnim { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-
-        .timer-container { font-size: 1.2rem; transition: 0.3s; padding: 5px 10px; border-radius: 10px; }
-
-        /* Stats & Modal */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; margin-top: 20px; }
-        .stat-card { background: #f8f9fa; padding: 15px; border-radius: 15px; border: 2px solid #eee; text-align: center; display:flex; flex-direction:column; justify-content:center; align-items:center; }
-        .stat-card h3 { font-size: 0.8rem; color: #b2bec3; margin-bottom: 5px; text-transform: uppercase; }
-        .stat-card p { font-size: 1.5rem; font-weight: 800; color: var(--dark); margin: 0; }
-        .stat-icon { font-size: 1.5rem; margin-bottom: 5px; display:block; }
-
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
-            z-index: 2000; display: flex; align-items: center; justify-content: center;
+        .toast {
+            position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px;
+            font-weight: 700; font-size: 1.2rem; z-index: 3000; pointer-events: none;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        @keyframes popIn { from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
 
-        #countdown-overlay {
-            position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 3000;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 8rem; font-weight: 900; color: var(--primary);
-        }
-
-        .result-score { font-size: 4rem; font-weight: 900; color: var(--primary); margin: 10px 0; z-index: 10; position: relative; }
-        
-        @keyframes bounce { from { transform: rotate(10deg) scale(1); } to { transform: rotate(10deg) scale(1.1); } }
+        /* Animations */
+        .shake { animation: shake 0.4s; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
-        .shake { animation: shake 0.3s; }
-        .pop { animation: pop 0.2s; }
-        @keyframes pop { 50% { transform: scale(1.05); } }
+        
+        .frozen-ui { filter: grayscale(1) blur(1px); pointer-events: none; opacity: 0.8; }
+        .correct-answer-show { color: var(--success); font-size: 1.5rem; font-weight: 900; background: white; padding: 5px 10px; border-radius: 10px; margin-top: 5px; display: inline-block; }
 
-        @media (max-width: 500px) {
-            .title { font-size: 1.8rem; }
-            .question-text { font-size: 2.2rem; }
-            .btn-submit { height: 55px; font-size: 1.5rem; }
-            .setup-btn { font-size: 0.8rem; padding: 8px; }
-            .room-code-display { font-size: 2rem; }
-        }
     </style>
 </head>
 <body class="mode-tablet">
 
 <!-- Signature -->
-<div class="sami-g-signature">This is a<br><strong>Sami G.</strong><br>production.</div>
+<div class="sami-g-signature">Designed for<br><strong>Kids & Pros</strong></div>
 
-<button class="sound-toggle" onclick="toggleSound()" title="Ses Aç/Kapat">
+<button class="sound-toggle" onclick="toggleSound()">
     <span id="sound-icon">🔊</span>
 </button>
 
-<!-- IDENTITY SCREEN (NEW) -->
+<!-- IDENTITY SCREEN -->
 <div id="identity-screen" class="screen">
-    <div class="setup-card">
-        <div style="font-size: 3rem; margin-bottom: 10px;">👤</div>
-        <h1 class="title">Kimsin?</h1>
-        <p style="color: #636e72;">Düelloya başlamadan önce profilini oluştur.</p>
+    <div class="card">
+        <h1>Kimsin?</h1>
+        <p style="color:#636e72; margin-bottom:20px;">Yarışmaya başlamadan önce profilini seç.</p>
         
         <div class="avatar-grid">
-            <div class="avatar-option selected" onclick="selectAvatar('😎', this)">😎</div>
-            <div class="avatar-option" onclick="selectAvatar('🐱', this)">🐱</div>
-            <div class="avatar-option" onclick="selectAvatar('🦁', this)">🦁</div>
-            <div class="avatar-option" onclick="selectAvatar('🚀', this)">🚀</div>
-            <div class="avatar-option" onclick="selectAvatar('🦄', this)">🦄</div>
+            <div class="avatar-opt selected" onclick="selectAvatar('😎', this)">😎</div>
+            <div class="avatar-opt" onclick="selectAvatar('🚀', this)">🚀</div>
+            <div class="avatar-opt" onclick="selectAvatar('🦄', this)">🦄</div>
+            <div class="avatar-opt" onclick="selectAvatar('🦁', this)">🦁</div>
+            <div class="avatar-opt" onclick="selectAvatar('🐱', this)">🐱</div>
         </div>
 
-        <input type="text" id="player-name-input" class="name-input" placeholder="Adını Yaz (örn: Ali)" maxlength="10">
+        <input type="text" id="player-name-input" class="inp-text" placeholder="İsmin (Örn: Ali)" maxlength="12">
 
-        <button class="big-start-btn" onclick="saveIdentity()">DEVAM ET</button>
+        <button class="big-btn" onclick="saveIdentity()">DEVAM ET</button>
     </div>
 </div>
 
 <!-- SETUP SCREEN -->
 <div id="setup-screen" class="screen hidden">
-    <div class="setup-card">
-        <h1 class="title">Ayarlar</h1>
-        <div style="font-size: 0.9rem; color: #636e72; margin-bottom: 15px;">Hoş geldin, <span id="display-player-name" style="font-weight:700; color:var(--primary)">Oyuncu</span>!</div>
-        
-        <span class="section-label">Cihaz Modu</span>
+    <div class="card">
+        <h1>Matematik Ustası</h1>
+        <div style="font-weight:700; color:var(--primary); margin-bottom:15px;">Hoş geldin, <span id="display-name">Oyuncu</span>!</div>
+
+        <span class="section-title">Cihaz Modu</span>
         <div class="btn-group">
-            <button class="setup-btn" onclick="setDevice('phone', this)">📱 Telefon</button>
-            <button class="setup-btn active" onclick="setDevice('tablet', this)">📲 Tablet</button>
-            <button class="setup-btn" onclick="setDevice('board', this)">🖥️ Tahta</button>
+            <button class="opt-btn" onclick="setDevice('phone', this)">📱 Telefon</button>
+            <button class="opt-btn active" onclick="setDevice('tablet', this)">📲 Tablet</button>
+            <button class="opt-btn" onclick="setDevice('board', this)">🖥️ Tahta</button>
         </div>
 
-        <span class="section-label">Oyun Modu</span>
+        <span class="section-title">Oyun Modu</span>
         <div class="btn-group">
-            <button class="setup-btn active" onclick="setMode('time', this)">⏱️ 60sn</button>
-            <button class="setup-btn" onclick="setMode('count', this)">📝 20 Soru</button>
-            <button class="setup-btn" onclick="setMode('survival', this)">🔥 Zamana Karşı</button>
-            <button class="setup-btn" style="background:#0984e3; color:white; border-color:#0984e3;" onclick="setMode('online', this)">🌍 Online Düello</button>
+            <button class="opt-btn" onclick="setMode('count', this)">📝 20 Soru</button>
+            <button class="opt-btn" onclick="setMode('survival', this)">🔥 Zamana Karşı</button>
+            <button class="opt-btn" style="background:#0984e3; color:white;" onclick="setMode('online', this)">🌍 Online Düello</button>
         </div>
-        
-        <!-- Online Lobby UI -->
-        <div id="online-lobby" class="online-lobby hidden">
-             <div style="display:flex; gap:10px;">
-                 <button class="setup-btn active" onclick="createRoom()">Oda Kur</button>
-                 <button class="setup-btn" onclick="showJoinInput()">Odaya Katıl</button>
-             </div>
-             
-             <!-- Join Input -->
-             <div id="join-area" class="hidden" style="margin-top:10px;">
-                 <input id="room-code-input" class="room-code-input" type="number" placeholder="Kodu Gir">
-                 <button class="big-start-btn" style="margin-top:10px; padding:10px;" onclick="joinRoom()">KATIL</button>
-             </div>
-        </div>
-        
-        <span class="section-label" id="diff-label">Zorluk</span>
-        <div class="btn-group" id="diff-group">
-            <button class="setup-btn active" onclick="setDiff(1, this)">Kolay</button>
-            <button class="setup-btn" onclick="setDiff(2, this)">Orta</button>
-            <button class="setup-btn" onclick="setDiff(3, this)">Zor</button>
+        <div id="mode-desc" style="font-size:0.8rem; color:#636e72; min-height:1.2rem; margin-bottom:10px;">Stres yok! 20 soruyu çöz.</div>
+
+        <!-- SOLO OPTIONS -->
+        <div id="solo-options">
+            <span class="section-title">Zorluk</span>
+            <div class="btn-group">
+                <button class="opt-btn active" onclick="setDiff(1, this)">Kolay</button>
+                <button class="opt-btn" onclick="setDiff(2, this)">Orta</button>
+                <button class="opt-btn" onclick="setDiff(3, this)">Zor</button>
+            </div>
+            
+            <span class="section-title">İşlemler</span>
+            <div class="btn-group">
+                <button class="opt-btn active op-btn" onclick="toggleOp('+', this)">Toplama</button>
+                <button class="opt-btn active op-btn" onclick="toggleOp('-', this)">Çıkarma</button>
+                <button class="opt-btn op-btn" onclick="toggleOp('*', this)">Çarpma</button>
+                <button class="opt-btn op-btn" onclick="toggleOp('/', this)">Bölme</button>
+            </div>
+            <button class="big-btn" onclick="startSoloGame()">OYUNA BAŞLA</button>
         </div>
 
-        <span class="section-label" id="op-label">İşlemler</span>
-        <div class="btn-group" id="op-group">
-            <button class="setup-btn active op-btn" onclick="toggleOp('+', this)">Toplama</button>
-            <button class="setup-btn active op-btn" onclick="toggleOp('-', this)">Çıkarma</button>
-            <button class="setup-btn op-btn" onclick="toggleOp('*', this)">Çarpma</button>
-            <button class="setup-btn op-btn" onclick="toggleOp('/', this)">Bölme</button>
+        <!-- ONLINE OPTIONS -->
+        <div id="online-options" class="hidden">
+            <div style="background:#e3f2fd; padding:15px; border-radius:15px; margin-top:10px;">
+                <div style="display:flex; gap:10px;">
+                    <button class="big-btn btn-blue" style="margin:0; flex:1;" onclick="setupOnlineRoom()">ODA KUR</button>
+                </div>
+                <div style="margin:15px 0; font-weight:700; color:#b2bec3;">- VEYA -</div>
+                <div style="display:flex; gap:5px;">
+                    <input id="room-join-code" type="number" class="inp-text" placeholder="Oda Kodu" style="font-size:1rem;">
+                    <button class="big-btn" style="margin:0; width:auto; padding:0 20px;" onclick="joinRoom()">KATIL</button>
+                </div>
+            </div>
         </div>
 
-        <button id="main-start-btn" class="big-start-btn" onclick="prepareGame('setup-screen')">BAŞLA</button>
-        <button class="big-start-btn secondary-btn" style="margin-top:10px; background:white;" onclick="showStats()">🏅 BAŞARILARIM</button>
-
-        <div id="mode-toast" class="mode-toast">En çok doğruyu 60 saniyede yapmaya çalış!</div>
+        <button class="big-btn btn-white" style="margin-top:10px; font-size:1rem;" onclick="showStats()">🏆 Skorlar</button>
     </div>
 </div>
 
-<!-- READY ROOM (ONLINE WAITING) -->
-<div id="ready-room" class="screen hidden">
-    <div class="setup-card">
-        <div style="font-size: 0.9rem; color:#b2bec3; text-transform: uppercase; font-weight:700;">ODA KODU</div>
-        <div class="room-code-container" onclick="shareRoomCode()">
-            <div id="lobby-code-display" class="room-code-display">---</div>
-            <button class="share-btn" title="Kodu Kopyala">🔗</button>
-        </div>
-        <div style="font-size:0.8rem; color:var(--success); margin-bottom:15px; height:1rem;" id="copy-feedback"></div>
+<!-- ONLINE SETUP SCREEN (HOST ONLY) -->
+<div id="online-setup-screen" class="screen hidden">
+    <div class="card">
+        <h2>Oda Ayarları</h2>
+        <p style="font-size:0.9rem; color:#636e72;">Rakibin gelmeden kuralları belirle.</p>
 
-        <div id="p1-card" class="player-card">
-            <div class="player-avatar" id="p1-avatar">👤</div>
-            <div class="player-info">
-                <div class="player-name" id="p1-name">Bekleniyor...</div>
-                <div class="player-status" id="p1-status">Hazırlanıyor</div>
-            </div>
+        <span class="section-title">Süre</span>
+        <div class="btn-group">
+            <button class="opt-btn active" onclick="setHostTime(60, this)">60sn</button>
+            <button class="opt-btn" onclick="setHostTime(120, this)">120sn</button>
+            <button class="opt-btn" onclick="setHostTime(180, this)">180sn</button>
         </div>
 
-        <div id="p2-card" class="player-card">
-            <div class="player-avatar" id="p2-avatar">👤</div>
-            <div class="player-info">
-                <div class="player-name" id="p2-name">Bekleniyor...</div>
-                <div class="player-status" id="p2-status">Bağlantı Yok</div>
-            </div>
+        <span class="section-title">Zorluk</span>
+        <div class="btn-group">
+            <button class="opt-btn active" onclick="setHostDiff(1, this)">Kolay</button>
+            <button class="opt-btn" onclick="setHostDiff(2, this)">Orta</button>
+            <button class="opt-btn" onclick="setHostDiff(3, this)">Zor</button>
         </div>
 
-        <button id="ready-btn" class="big-start-btn" style="background:var(--light); color:var(--dark);" onclick="toggleReady()">HAZIR DEĞİLİM</button>
-        <button class="big-start-btn secondary-btn" style="margin-top:10px; background:white; color:var(--danger);" onclick="leaveLobby()">ÇIK</button>
+        <span class="section-title">İşlem</span>
+        <div class="btn-group">
+            <button class="opt-btn active" onclick="setHostOp('mixed', this)">Karışık</button>
+            <button class="opt-btn" onclick="setHostOp('+', this)">Toplama</button>
+            <button class="opt-btn" onclick="setHostOp('*', this)">Çarpma</button>
+        </div>
+
+        <button class="big-btn btn-blue" onclick="createRoomFinal()">ODAYI OLUŞTUR</button>
+        <button class="big-btn btn-white" style="margin-top:10px;" onclick="goHome()">İptal</button>
     </div>
 </div>
 
-<!-- READY SCREEN (INSTRUCTIONS) -->
-<div id="ready-screen" class="screen hidden" style="background: rgba(108, 92, 231, 0.1);">
-    <div class="setup-card">
-        <h2 class="title" id="ready-title">Hazır Mısın?</h2>
-        <div style="text-align: left; background: #f1f2f6; padding: 20px; border-radius: 20px; margin: 20px 0;">
-            <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 1.5rem;">✅</span> Doğru cevaplar sana puan ve seri kazandırır.
-            </div>
-            <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 1.5rem;">🧊</span> Yanlış cevap verirsen <strong>TUŞLAR DONAR!</strong>
-            </div>
-            <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 1.5rem;">⏭️</span> Zorlanırsan <strong>PAS</strong> hakkını kullan.
-            </div>
+<!-- LOBBY SCREEN -->
+<div id="lobby-screen" class="screen hidden">
+    <div class="card">
+        <h2>Bekleme Odası</h2>
+        <div class="lobby-code-box" onclick="copyCode()">
+            <span id="lobby-code" class="lobby-code">----</span>
+            <div class="copy-icon">📋</div>
+            <div id="copy-msg" style="position:absolute; bottom:-20px; font-size:0.7rem; color:var(--success);"></div>
         </div>
-        <button class="big-start-btn" style="background: var(--primary);" onclick="startCountdown()">HAZIRIM!</button>
-    </div>
-</div>
+        <p style="font-size:0.8rem; margin-bottom:15px; color:#b2bec3;">Kodu arkadaşınla paylaş!</p>
 
-<!-- COUNTDOWN OVERLAY -->
-<div id="countdown-overlay" class="hidden">3</div>
+        <div class="player-list">
+            <div class="player-row" id="p1-row">
+                <div class="p-avatar" id="p1-av">😎</div>
+                <div class="p-name" id="p1-n">Sen</div>
+                <div class="p-status" id="p1-s">Hazırlanıyor</div>
+            </div>
+            <div class="player-row" id="p2-row">
+                <div class="p-avatar" id="p2-av">👤</div>
+                <div class="p-name" id="p2-n">Rakip Bekleniyor...</div>
+                <div class="p-status" id="p2-s">---</div>
+            </div>
+        </div>
 
-<!-- STATS SCREEN -->
-<div id="stats-screen" class="screen hidden">
-    <div class="setup-card">
-        <h2 class="title" style="color:var(--dark)">🏅 Başarılarım</h2>
-        <div class="stats-grid">
-            <div class="stat-card">
-                <span class="stat-icon">🎮</span>
-                <h3>Toplam Oyun</h3>
-                <p id="stat-total-games">0</p>
-            </div>
-            <div class="stat-card">
-                <span class="stat-icon">🏆</span>
-                <h3>En Yüksek Puan</h3>
-                <p id="stat-high-score" style="color:var(--gold)">0</p>
-            </div>
-            <div class="stat-card">
-                <span class="stat-icon">✅</span>
-                <h3>Toplam Doğru</h3>
-                <p id="stat-total-correct" style="color:var(--success)">0</p>
-            </div>
-            <div class="stat-card">
-                <span class="stat-icon">⏳</span>
-                <h3>Toplam Süre</h3>
-                <p id="stat-total-time" style="font-size:1.1rem; color:var(--primary)">0s</p>
-            </div>
-        </div>
-        
-        <div style="display: flex; gap: 10px; margin-top: 20px;">
-            <button class="big-start-btn secondary-btn" style="background: #e74c3c; color: white; margin-top:0;" onclick="resetStats()">SIFIRLA</button>
-            <button class="big-start-btn" style="margin-top:0;" onclick="switchScreen('stats-screen', 'setup-screen')">GERİ DÖN</button>
-        </div>
+        <div style="margin-top:20px; font-size:0.8rem; color:#e17055;" id="lobby-timer">Otomatik kapanış: 3:00</div>
+
+        <button id="lobby-ready-btn" class="big-btn" onclick="toggleReady()">HAZIRIM</button>
+        <button class="big-btn btn-red" style="margin-top:10px;" onclick="leaveLobby()">ODADAN AYRIL</button>
     </div>
 </div>
 
 <!-- GAME SCREEN -->
-<div id="game-screen" class="screen hidden" style="background: transparent;">
+<div id="game-screen" class="screen hidden" style="background:transparent;">
+    <!-- Header -->
     <div id="game-header">
-        <div class="header-controls">
-            <button class="modern-icon-btn" onclick="confirmHome()" title="Ana Sayfa">
-                <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-            </button>
-            <button class="modern-icon-btn" onclick="togglePause()" title="Duraklat">
-                <svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-            </button>
+        <div class="score-pill" id="enemy-pill" style="opacity:0;">
+            <span class="pill-label" id="enemy-name">Rakip</span>
+            <span class="pill-val" id="enemy-score">0</span>
         </div>
         
-        <!-- Online Specific Header Info -->
-        <div id="online-info" class="progress-container hidden" style="flex-direction: row; gap: 15px; justify-content: center;">
-             <div class="score-box opponent">
-                 <div id="opp-avatar" style="font-size:1rem;">👤</div>
-                 <div id="opp-score">0</div>
-             </div>
-             <div style="font-weight:900; color:#b2bec3;">VS</div>
-             <div class="score-box">
-                 <div id="my-avatar" style="font-size:1rem;">😎</div>
-                 <div id="score-display-online">0</div>
-             </div>
+        <div style="text-align:center;">
+            <div style="font-size:2rem; font-weight:900;" id="timer-display">60</div>
+            <div style="font-size:0.7rem; font-weight:700; color:#636e72;" id="game-mode-label">MOD</div>
         </div>
 
-        <div id="solo-info" class="progress-container">
-            <div class="level-badge" id="level-txt">Seviye 1</div>
-            <div class="progress-track">
-                <div class="progress-fill" id="progress-bar"></div>
-            </div>
-            <div class="score-box" style="margin-top:5px;">
-                <div style="font-size:0.6rem; opacity:0.8;">PUAN</div>
-                <div id="score-display">0</div>
-            </div>
+        <div class="score-pill">
+            <span class="pill-label">Sen</span>
+            <span class="pill-val" id="my-score">0</span>
         </div>
     </div>
 
-    <div id="game-area">
-        <!-- Zamanlayıcı Göstergesi -->
-        <div class="timer-container" id="timer-box" style="margin-bottom:10px; font-weight:700; color:#b2bec3; display:flex; gap:5px; align-items:center;">
-             <span id="mode-icon-display">⏱️</span> <span id="time-display" style="font-size: 1.5rem;">60</span>
-        </div>
+    <!-- Powerups -->
+    <div id="powerup-bar" class="powerup-bar hidden">
+        <button class="pu-btn" id="pu-shield" onclick="usePowerup('shield')" title="Kalkan (1 Hata Koru)">🛡️<span class="pu-badge">1</span></button>
+        <button class="pu-btn" id="pu-time" onclick="usePowerup('time')" title="+5 Saniye">⏳<span class="pu-badge">1</span></button>
+        <button class="pu-btn" id="pu-freeze" onclick="usePowerup('freeze')" title="Rakibi Dondur">❄️<span class="pu-badge">1</span></button>
+    </div>
 
-        <div class="question-container" id="q-container">
-            <div class="streak-container" id="streak-badge">x2 SERİ!</div>
-            <div class="question-text" id="q-text">2 + 2</div>
-            <div class="answer-preview" id="ans-preview"></div>
-        </div>
-
-        <div class="numpad" id="numpad-area">
-            <!-- Row 1 -->
-            <button class="btn" onclick="input(1)">1</button>
-            <button class="btn" onclick="input(2)">2</button>
-            <button class="btn" onclick="input(3)">3</button>
-            <!-- Row 2 -->
-            <button class="btn" onclick="input(4)">4</button>
-            <button class="btn" onclick="input(5)">5</button>
-            <button class="btn" onclick="input(6)">6</button>
-            <!-- Row 3 -->
-            <button class="btn" onclick="input(7)">7</button>
-            <button class="btn" onclick="input(8)">8</button>
-            <button class="btn" onclick="input(9)">9</button>
-            <!-- Row 4 -->
-            <button class="btn btn-del" onclick="input('del')">SİL</button>
-            <button class="btn" onclick="input(0)">0</button>
-            <button class="btn btn-pas" id="btn-pas" onclick="passQuestion()">
-                <span>PAS</span>
-                <div class="pas-dots" id="pas-dots">
-                    <div class="pas-dot active"></div>
-                    <div class="pas-dot active"></div>
-                    <div class="pas-dot active"></div>
-                </div>
-            </button>
-        </div>
-        
-        <div id="reaction-area" class="reaction-bar hidden">
-            <button class="reaction-btn" onclick="sendReaction('😂')">😂</button>
-            <button class="reaction-btn" onclick="sendReaction('😎')">😎</button>
-            <button class="reaction-btn" onclick="sendReaction('😭')">😭</button>
-            <button class="reaction-btn" onclick="sendReaction('😡')">😡</button>
-        </div>
-
-        <div class="submit-area">
-            <button class="btn-submit" onclick="checkAnswer()">CEVAPLA</button>
+    <!-- Question Area -->
+    <div id="q-area">
+        <div class="q-card" id="q-card">
+            <div style="position:absolute; top:10px; right:15px; color:#fab1a0; font-weight:800; opacity:0;" id="streak-indicator">x2 🔥</div>
+            <div class="q-text" id="q-text">2 + 2</div>
+            <div class="correct-answer-show hidden" id="correct-ans-display">Cevap: 4</div>
+            <div class="ans-preview" id="ans-preview"></div>
         </div>
     </div>
-</div>
 
-<!-- PAUSE MODAL -->
-<div id="pause-modal" class="modal-overlay hidden">
-    <div class="setup-card" style="max-width:300px;">
-        <h2 class="title">DURAKLATILDI</h2>
-        <button class="big-start-btn" onclick="togglePause()">DEVAM ET</button>
-        <button class="big-start-btn secondary-btn" style="background:var(--danger); color:white;" onclick="quitGame()">ÇIKIŞ</button>
+    <!-- Numpad -->
+    <div class="numpad" id="numpad">
+        <button class="num-btn" onclick="input(1)">1</button>
+        <button class="num-btn" onclick="input(2)">2</button>
+        <button class="num-btn" onclick="input(3)">3</button>
+        <button class="num-btn" onclick="input(4)">4</button>
+        <button class="num-btn" onclick="input(5)">5</button>
+        <button class="num-btn" onclick="input(6)">6</button>
+        <button class="num-btn" onclick="input(7)">7</button>
+        <button class="num-btn" onclick="input(8)">8</button>
+        <button class="num-btn" onclick="input(9)">9</button>
+        <button class="num-btn del" onclick="input('del')">⬅</button>
+        <button class="num-btn" onclick="input(0)">0</button>
+        <button class="num-btn pas" id="btn-pas" onclick="passQuestion()">PAS<span style="font-size:0.6rem;">(3)</span></button>
     </div>
+
+    <div class="reaction-bar hidden" id="reaction-bar">
+        <button class="react-btn" onclick="sendReaction('👏')">👏</button>
+        <button class="react-btn" onclick="sendReaction('😂')">😂</button>
+        <button class="react-btn" onclick="sendReaction('😭')">😭</button>
+        <button class="react-btn" onclick="sendReaction('😡')">😡</button>
+        <button class="react-btn" onclick="sendReaction('😱')">😱</button>
+    </div>
+
+    <button class="big-btn btn-success" style="max-width:400px; margin-top:15px;" onclick="checkAnswer()">CEVAPLA</button>
 </div>
 
 <!-- RESULT SCREEN -->
 <div id="result-screen" class="screen hidden">
-    <canvas id="confetti-canvas" style="position:absolute; inset:0; pointer-events:none;"></canvas>
-    <div style="font-size: 4rem; z-index:10; position:relative;">🏆</div>
-    <h1 id="result-title" style="color:var(--dark); z-index:10; position:relative;">Oyun Bitti!</h1>
-    
-    <div id="new-record-msg" class="hidden" style="background:var(--gold); padding:5px 15px; border-radius:10px; font-weight:700; color:#d35400; margin-bottom:10px; z-index:10;">YENİ REKOR! 🔥</div>
-    
-    <div class="result-score" id="final-score">0</div>
-    
-    <div id="stats-detail-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; width:100%; max-width:400px; margin-bottom:20px; z-index:10; position:relative;">
-        <div style="background:#f1f2f6; padding:15px; border-radius:15px; text-align:center;">
-            <div class="stat-label">Doğru</div>
-            <div style="font-weight:800; font-size:1.5rem; color:var(--success);" id="final-correct">0</div>
+    <canvas id="confetti" style="position:absolute; inset:0; pointer-events:none;"></canvas>
+    <div class="card" style="z-index:10;">
+        <h1 id="res-title">Oyun Bitti!</h1>
+        <div style="font-size:4rem; margin:10px 0;" id="res-emoji">🏆</div>
+        
+        <div id="solo-stats">
+            <div style="font-size:3rem; font-weight:900; color:var(--primary);" id="res-score">0</div>
+            <p style="color:#b2bec3; font-weight:700;">PUAN</p>
         </div>
-        <div style="background:#f1f2f6; padding:15px; border-radius:15px; text-align:center;">
-            <div class="stat-label">Yanlış</div>
-            <div style="font-weight:800; font-size:1.5rem; color:var(--danger);" id="final-wrong">0</div>
-        </div>
-    </div>
-    
-    <!-- Online Result Area -->
-    <div id="online-result-area" class="hidden" style="width:100%; max-width:500px; margin-bottom:20px; z-index:10;">
-        <div style="display:flex; justify-content:space-around; align-items:center; background:#f8f9fa; padding:15px; border-radius:15px; border:2px solid #eee;">
-             <div style="text-align:center;">
-                 <div id="res-p1-avatar" style="font-size:2rem;">😎</div>
-                 <div id="res-p1-name" class="stat-label" style="color:var(--primary)">Sen</div>
-                 <div id="res-p1-score" style="font-size:1.5rem; font-weight:800;">0</div>
-             </div>
-             <div style="font-size:1.5rem; font-weight:900; color:#b2bec3;">VS</div>
-             <div style="text-align:center;">
-                 <div id="res-p2-avatar" style="font-size:2rem;">👤</div>
-                 <div id="res-p2-name" class="stat-label" style="color:var(--secondary)">Rakip</div>
-                 <div id="res-p2-score" style="font-size:1.5rem; font-weight:800;">0</div>
-             </div>
-        </div>
-        <div id="winner-msg" style="margin-top:15px; font-size:1.5rem; font-weight:900; color:var(--success);"></div>
-        <div id="rematch-status" style="margin-top:10px; color:#636e72; font-size:0.9rem; min-height:1.2rem;"></div>
-    </div>
 
-    <button id="main-replay-btn" class="big-start-btn" style="max-width:300px; z-index:10; position:relative;" onclick="prepareGame('result-screen')">TEKRAR OYNA</button>
-    <button id="rematch-btn" class="big-start-btn hidden" style="max-width:300px; z-index:10; position:relative; background:var(--primary);" onclick="requestRematch()">TEKRAR YARIŞ</button>
-    <button class="big-start-btn secondary-btn" style="max-width:300px; margin-top:10px; z-index:10; position:relative; background:white;" onclick="goHome()">ANA SAYFA</button>
+        <div id="online-stats" class="hidden">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
+                <div style="background:#f1f2f6; padding:10px; border-radius:15px;">
+                    <div id="end-p1-name" style="font-weight:700; color:var(--primary)">Sen</div>
+                    <div id="end-p1-score" style="font-size:1.5rem; font-weight:900;">0</div>
+                </div>
+                <div style="background:#f1f2f6; padding:10px; border-radius:15px;">
+                    <div id="end-p2-name" style="font-weight:700; color:var(--danger)">Rakip</div>
+                    <div id="end-p2-score" style="font-size:1.5rem; font-weight:900;">0</div>
+                </div>
+            </div>
+            <div id="res-msg" style="font-size:1.2rem; font-weight:800; color:var(--success);">Kazandın!</div>
+        </div>
+        
+        <button id="btn-rematch" class="big-btn btn-blue hidden" onclick="requestRematch()">TEKRAR YARIŞ</button>
+        <button class="big-btn btn-white" style="margin-top:10px;" onclick="goHome()">ANA SAYFA</button>
+        <div id="rematch-status" style="margin-top:10px; font-size:0.8rem; color:#636e72; min-height:1rem;"></div>
+    </div>
 </div>
 
-<div id="overlay-feedback" class="overlay-msg">DOĞRU!</div>
+<!-- STATS SCREEN -->
+<div id="stats-screen" class="screen hidden">
+    <div class="card">
+        <h2>İstatistikler</h2>
+        <div style="font-size:3rem;">🏅</div>
+        <p style="margin-bottom:20px;">En Yüksek Puan: <strong id="stat-best" style="color:var(--success)">0</strong></p>
+        <p>Toplam Oyun: <span id="stat-games">0</span></p>
+        <p>Toplam Doğru: <span id="stat-correct">0</span></p>
+        <button class="big-btn" onclick="goHome()">KAPAT</button>
+        <button class="big-btn btn-red" style="margin-top:10px; font-size:0.9rem;" onclick="clearStats()">SIFIRLA</button>
+    </div>
+</div>
 
-<!-- Firebase Logic & Game Code -->
+<div id="countdown-overlay" class="screen hidden" style="background:rgba(255,255,255,0.9); font-size:8rem; font-weight:900; color:var(--primary); z-index:5000;">3</div>
+
+<!-- Firebase & Logic -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
   import { getDatabase, ref, set, onValue, update, remove, get, onDisconnect } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
@@ -648,855 +502,795 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // Global Access
-  window.db = db; window.ref = ref; window.set = set; window.onValue = onValue; window.update = update; window.remove = remove; window.get = get; window.onDisconnect = onDisconnect;
-
-  // --- STATE ---
-    let config = { diff: 1, ops: ['+', '-'], mode: 'time', device: 'tablet' };
-    let state = { 
-        score: 0, time: 60, active: false, paused: false, frozen: false,
-        currentQ: {}, input: '', streak: 0, correct: 0, wrong: 0, passes: 3,
-        levelProgress: 0, level: 1, questionsAnswered: 0, sessionTime: 0,
-        // Identity
-        identity: { name: '', avatar: '😎' },
-        // Online Mode
-        isOnline: false, roomCode: null, playerId: null, opponentScore: 0,
-        opponentName: 'Rakip', opponentAvatar: '👤', isReady: false, opponentReady: false,
-        hasJoinedAudio: false
-    };
-    let timerInterval;
-    let stats = JSON.parse(localStorage.getItem('mathStats')) || { games: 0, best: 0, correct: 0, wrong: 0, totalSeconds: 0 };
-    
-    // Check for existing identity
-    const savedId = localStorage.getItem('mathIdentity');
-    if(savedId) {
-        state.identity = JSON.parse(savedId);
-        document.getElementById('display-player-name').textContent = state.identity.name;
-        document.getElementById('identity-screen').classList.add('hidden'); 
-        document.getElementById('setup-screen').classList.remove('hidden');
-    } else {
-        document.getElementById('identity-screen').classList.remove('hidden');
-    }
-
-    // --- SOUND ---
-    let soundEnabled = true;
-    let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-    function playSound(type) {
-        if (!soundEnabled) return;
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-        osc.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        const now = audioCtx.currentTime;
-
-        if (type === 'click') {
-            osc.type = 'triangle'; osc.frequency.setValueAtTime(600, now);
-            osc.frequency.exponentialRampToValueAtTime(300, now + 0.05);
-            gainNode.gain.setValueAtTime(0.05, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.05);
-            osc.start(now); osc.stop(now + 0.05);
-        } else if (type === 'correct') {
-            osc.type = 'sine'; osc.frequency.setValueAtTime(500, now);
-            osc.frequency.exponentialRampToValueAtTime(1000, now + 0.1);
-            gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.3);
-            osc.start(now); osc.stop(now + 0.3);
-        } else if (type === 'wrong') { 
-            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, now);
-            osc.frequency.linearRampToValueAtTime(50, now + 0.4);
-            gainNode.gain.setValueAtTime(0.2, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.4);
-            osc.start(now); osc.stop(now + 0.4);
-        } else if (type === 'pass') {
-             osc.type = 'square'; osc.frequency.setValueAtTime(300, now);
-             gainNode.gain.setValueAtTime(0.05, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.1);
-             osc.start(now); osc.stop(now + 0.1);
-        } else if (type === 'start') {
-             osc.type = 'triangle'; osc.frequency.setValueAtTime(400, now);
-             osc.frequency.exponentialRampToValueAtTime(800, now + 0.3);
-             gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.3);
-             osc.start(now); osc.stop(now + 0.3);
-        } else if (type === 'join') {
-             osc.type = 'sine'; osc.frequency.setValueAtTime(400, now);
-             gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.2);
-             osc.start(now); osc.stop(now + 0.2);
-        }
-    }
-
-    // --- GLOBAL FUNCTIONS ---
-    window.toggleSound = function() {
-        soundEnabled = !soundEnabled;
-        document.getElementById('sound-icon').textContent = soundEnabled ? '🔊' : '🔇';
-    };
-
-    window.switchScreen = function(fromId, toId) {
-        playSound('click');
-        const fromEl = document.getElementById(fromId);
-        const toEl = document.getElementById(toId);
-        fromEl.classList.add('fade-out');
-        setTimeout(() => {
-            fromEl.classList.add('hidden');
-            fromEl.classList.remove('fade-out');
-            toEl.classList.remove('hidden');
-        }, 300);
-    };
-
-    // --- IDENTITY LOGIC ---
-    window.selectAvatar = function(emoji, btn) {
-        state.identity.avatar = emoji;
-        document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
-        btn.classList.add('selected');
-        playSound('click');
-    };
-
-    window.saveIdentity = function() {
-        const name = document.getElementById('player-name-input').value.trim();
-        if(!name) return alert("Lütfen bir isim yaz!");
-        state.identity.name = name;
-        localStorage.setItem('mathIdentity', JSON.stringify(state.identity));
-        document.getElementById('display-player-name').textContent = name;
-        switchScreen('identity-screen', 'setup-screen');
-    };
-
-    // --- MENU LOGIC ---
-    window.setDevice = function(dev, btn) { playSound('click'); config.device = dev; document.body.className = `mode-${dev}`; updateBtnGroup(btn); };
-
-    window.setMode = function(m, btn) {
-        playSound('click'); config.mode = m; updateBtnGroup(btn);
-        
-        // Hide/Show Elements
-        document.getElementById('online-lobby').classList.add('hidden');
-        document.getElementById('diff-label').classList.remove('hidden');
-        document.getElementById('diff-group').classList.remove('hidden');
-        document.getElementById('op-label').classList.remove('hidden');
-        document.getElementById('op-group').classList.remove('hidden');
-        document.getElementById('main-start-btn').classList.remove('hidden');
-
-        if (m === 'online') {
-             document.getElementById('online-lobby').classList.remove('hidden');
-             document.getElementById('diff-label').classList.add('hidden');
-             document.getElementById('diff-group').classList.add('hidden');
-             document.getElementById('op-label').classList.add('hidden');
-             document.getElementById('op-group').classList.add('hidden');
-             document.getElementById('main-start-btn').classList.add('hidden');
-        }
-
-        const toast = document.getElementById('mode-toast');
-        let msg = "";
-        if(m === 'time') msg = "⏱️ En çok doğruyu 60 saniyede yapmaya çalış!";
-        else if(m === 'count') msg = "📝 Stres yok! 20 soruyu kendi hızında çöz.";
-        else if(m === 'survival') msg = "🔥 Her doğru ek süre verir, yanlış süreni götürür!";
-        else if(m === 'online') msg = "🌍 Odaya bağlan, rakibinle aynı anda yarış!";
-        
-        toast.textContent = msg; toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3000);
-    };
-
-    window.setDiff = function(d, btn) { playSound('click'); config.diff = d; updateBtnGroup(btn); };
-    window.toggleOp = function(op, btn) {
-        playSound('click');
-        if (config.ops.includes(op)) {
-            if (config.ops.length > 1) { config.ops = config.ops.filter(o => o !== op); btn.classList.remove('active'); }
-        } else { config.ops.push(op); btn.classList.add('active'); }
-    };
-
-    function updateBtnGroup(btn) {
-        let siblings = btn.parentElement.children;
-        for (let sib of siblings) { if(!sib.classList.contains('op-btn')) sib.classList.remove('active'); }
-        btn.classList.add('active');
-    }
-    
-    function formatTime(seconds) {
-        const h = Math.floor(seconds / 3600);
-        const m = Math.floor((seconds % 3600) / 60);
-        const s = seconds % 60;
-        if(h > 0) return `${h}sa ${m}dk`;
-        return `${m}dk ${s}sn`;
-    }
-
-    // --- ONLINE LOBBY LOGIC ---
-    window.createRoom = function() {
-        const code = Math.floor(10000 + Math.random() * 90000);
-        state.roomCode = code; state.playerId = 'p1'; state.isOnline = true;
-        state.isReady = false;
-
-        // Reset Room
-        set(ref(db, 'rooms/' + code), {
-            status: 'waiting',
-            players: {
-                p1: { name: state.identity.name, avatar: state.identity.avatar, ready: false, score: 0 },
-            },
-            currentQuestion: null, lastAnswerBy: null
-        });
-
-        // Remove on disconnect
-        onDisconnect(ref(db, 'rooms/' + code)).remove();
-
-        enterReadyRoom(code);
-    };
-
-    window.showJoinInput = function() {
-        document.getElementById('join-area').classList.remove('hidden');
-    };
-
-    window.joinRoom = function() {
-        const code = document.getElementById('room-code-input').value;
-        if(!code) return alert("Lütfen kodu girin");
-        
-        get(ref(db, 'rooms/' + code)).then((snapshot) => {
-            if (snapshot.exists()) {
-                const data = snapshot.val();
-                if(data.status === 'waiting' && !data.players.p2) {
-                    state.roomCode = code; state.playerId = 'p2'; state.isOnline = true;
-                    state.isReady = false;
-                    
-                    update(ref(db, 'rooms/' + code + '/players/p2'), {
-                        name: state.identity.name, avatar: state.identity.avatar, ready: false, score: 0
-                    });
-                    
-                    onDisconnect(ref(db, 'rooms/' + code + '/players/p2')).remove();
-
-                    enterReadyRoom(code);
-                } else { alert("Oda dolu veya oyun başlamış!"); }
-            } else { alert("Oda bulunamadı!"); }
-        });
-    };
-
-    function enterReadyRoom(code) {
-        switchScreen('setup-screen', 'ready-room');
-        document.getElementById('lobby-code-display').textContent = code;
-        listenToLobby(code);
-    }
-
-    function listenToLobby(code) {
-        onValue(ref(db, 'rooms/' + code), (snapshot) => {
-            const data = snapshot.val();
-            if(!data) {
-                if(state.isOnline && state.active) return; 
-                alert("Oda kapatıldı!"); window.goHome(); return;
-            }
-
-            // Sync Players UI in Lobby
-            updatePlayerCard('p1', data.players?.p1);
-            updatePlayerCard('p2', data.players?.p2);
-
-            // HOST LOGIC TO START GAME
-            if (state.playerId === 'p1' && data.status === 'waiting') {
-                if (data.players?.p1?.ready && data.players?.p2?.ready) {
-                     // Both ready, start game
-                     update(ref(db, 'rooms/' + code), { status: 'playing' });
-                     generateOnlineQuestion();
-                }
-            }
-
-            // Sync Game Start
-            if(data.status === 'playing' && !state.active) {
-                 startOnlineGame(data);
-            }
-
-            // Sync Game Data (Score & Q & Reactions)
-            if(state.active) {
-                // Scores
-                const p1s = data.players.p1?.score || 0;
-                const p2s = data.players.p2?.score || 0;
-                
-                if(state.playerId === 'p1') { state.score = p1s; state.opponentScore = p2s; }
-                else { state.score = p2s; state.opponentScore = p1s; }
-                
-                document.getElementById('score-display-online').textContent = state.score;
-                document.getElementById('opp-score').textContent = state.opponentScore;
-
-                // Question Change
-                if(data.currentQuestion && data.currentQuestion.text !== state.currentQ.text) {
-                     state.currentQ = data.currentQuestion;
-                     document.getElementById('q-text').textContent = state.currentQ.text;
-                     document.getElementById('q-text').style.color = 'white';
-                     state.input = ''; updateInputDisplay();
-                     state.frozen = false;
-                     document.getElementById('numpad-area').classList.remove('frozen-pad');
-                     document.getElementById('q-container').classList.remove('shake');
-                     
-                     if(data.lastAnswerBy && data.lastAnswerBy !== state.playerId) {
-                         showFeedback(`${state.opponentName} BİLDİ! 🚀`, 'warn');
-                         document.getElementById('game-area').classList.add('shake');
-                         setTimeout(()=>document.getElementById('game-area').classList.remove('shake'), 300);
-                         playSound('wrong'); // Opponent answered, sound feedback
-                     }
-                }
-
-                // Reactions (Emojis)
-                const reaction = data.reaction;
-                if(reaction && reaction.from !== state.playerId && reaction.ts !== state.lastReactionTs) {
-                    state.lastReactionTs = reaction.ts;
-                    showFloatingEmoji(reaction.emoji);
-                    playSound('join');
-                }
-            }
-            
-            // Rematch Logic
-            if(data.status === 'finished') {
-                const p1R = data.players.p1?.rematch;
-                const p2R = data.players.p2?.rematch;
-                
-                if(p1R && p2R) {
-                    if(state.playerId === 'p1') {
-                        update(ref(db, 'rooms/' + code), {
-                            status: 'playing',
-                            'players/p1/score': 0, 'players/p1/rematch': null,
-                            'players/p2/score': 0, 'players/p2/rematch': null,
-                            lastAnswerBy: null
-                        });
-                        generateOnlineQuestion();
-                    }
-                } else if (!data.players.p1 || !data.players.p2) {
-                    document.getElementById('rematch-status').textContent = "Rakip ayrıldı...";
-                    document.getElementById('rematch-btn').classList.add('hidden');
-                } else if (p1R || p2R) {
-                     const who = p1R ? data.players.p1.name : data.players.p2.name;
-                     if((state.playerId === 'p1' && !p1R) || (state.playerId === 'p2' && !p2R)) {
-                         document.getElementById('rematch-status').textContent = `${who} tekrar istiyor!`;
-                     } else {
-                         document.getElementById('rematch-status').textContent = "Rakip bekleniyor...";
-                     }
-                }
-            }
-        });
-    }
-
-    function updatePlayerCard(pid, pData) {
-        const elName = document.getElementById(pid + '-name');
-        const elStatus = document.getElementById(pid + '-status');
-        const elAvatar = document.getElementById(pid + '-avatar');
-        const card = document.getElementById(pid + '-card');
-
-        if(pData) {
-            elName.textContent = pData.name;
-            elAvatar.textContent = pData.avatar;
-            if(pData.ready) {
-                elStatus.innerHTML = '<span class="ready-badge">HAZIR</span>';
-                card.classList.add('ready');
-                if(!state.hasJoinedAudio && pid !== state.playerId && state.roomCode) {
-                     playSound('join'); state.hasJoinedAudio = true; // Simple sound check
-                }
-            } else {
-                elStatus.textContent = 'Bekliyor...';
-                card.classList.remove('ready');
-            }
-            
-            if(pid !== state.playerId) {
-                state.opponentName = pData.name;
-                state.opponentAvatar = pData.avatar;
-            }
-        } else {
-            elName.textContent = 'Bekleniyor...';
-            elStatus.textContent = 'Bağlantı Yok';
-            elAvatar.textContent = '👤';
-            card.classList.remove('ready');
-        }
-    }
-
-    window.toggleReady = function() {
-        state.isReady = !state.isReady;
-        const btn = document.getElementById('ready-btn');
-        if(state.isReady) {
-            btn.textContent = "HAZIRIM (İptal Et)";
-            btn.style.background = "var(--success)";
-            btn.style.color = "white";
-        } else {
-            btn.textContent = "HAZIR DEĞİLİM";
-            btn.style.background = "var(--light)";
-            btn.style.color = "var(--dark)";
-        }
-        
-        update(ref(db, 'rooms/' + state.roomCode + '/players/' + state.playerId), {
-            ready: state.isReady
-        });
-    };
-    
-    // --- LOBBY EXIT ---
-    window.leaveLobby = function() {
-        if(state.roomCode && state.playerId) {
-             // Clean disconnect
-             update(ref(db, 'rooms/' + state.roomCode + '/players/' + state.playerId), null);
-             if (state.playerId === 'p1') {
-                 // Host closes room
-                 remove(ref(db, 'rooms/' + state.roomCode));
-             }
-        }
-        state.isOnline = false;
-        state.roomCode = null;
-        state.playerId = null;
-        window.goHome();
-    };
-
-    window.shareRoomCode = function() {
-        navigator.clipboard.writeText(state.roomCode.toString()).then(() => {
-            const fb = document.getElementById('copy-feedback');
-            fb.textContent = "Kopyalandı!";
-            setTimeout(() => fb.textContent = "", 2000);
-        });
-    };
-
-    function startOnlineGame(data) {
-        // Setup UI
-        switchScreen('ready-room', 'result-screen'); 
-        document.getElementById('result-screen').classList.add('hidden'); 
-        
-        // Populate Header
-        document.getElementById('my-avatar').textContent = state.identity.avatar;
-        document.getElementById('opp-avatar').textContent = state.opponentAvatar;
-        document.getElementById('online-info').classList.remove('hidden');
-        document.getElementById('solo-info').classList.add('hidden');
-        document.getElementById('reaction-area').classList.remove('hidden');
-
-        // Start Countdown
-        const countEl = document.getElementById('countdown-overlay');
-        countEl.classList.remove('hidden');
-        let count = 3; countEl.textContent = count;
-        
-        let int = setInterval(() => {
-            count--;
-            if(count > 0) { countEl.textContent = count; playSound('click'); } 
-            else if (count === 0) { countEl.textContent = "BAŞLA!"; playSound('start'); } 
-            else { 
-                clearInterval(int); 
-                countEl.classList.add('hidden'); 
-                
-                // Actual Logic Start
-                state.active = true; state.time = 60; state.score = 0; state.opponentScore = 0;
-                document.getElementById('game-screen').classList.remove('hidden');
-                let modeIcon = '🌍';
-                document.getElementById('mode-icon-display').textContent = modeIcon;
-                
-                // Timer
-                if (timerInterval) clearInterval(timerInterval);
-                timerInterval = setInterval(() => {
-                    if (!state.active) return;
-                    state.time--;
-                    // Update Time UI
-                    const tDiv = document.getElementById('time-display');
-                    const tContainer = document.getElementById('timer-box');
-                    tDiv.textContent = state.time;
-                    tContainer.classList.remove('blink-slow', 'blink-fast');
-                    if (state.time <= 5) tContainer.classList.add('blink-fast');
-                    else if (state.time <= 10) tContainer.classList.add('blink-slow');
-                    
-                    if (state.time <= 0) {
-                        window.endGame();
-                        if(state.playerId === 'p1') update(ref(db, 'rooms/' + state.roomCode), { status: 'finished' });
-                    }
-                }, 1000);
-            }
-        }, 800);
-    }
-
-    function generateOnlineQuestion() {
-        const ops = ['+', '-', '*', '/'];
-        const op = ops[Math.floor(Math.random() * ops.length)];
-        let n1, n2, ans, symbol = op;
-
-        if (op === '+') { n1 = r(30) + 10; n2 = r(20) + 5; ans = n1 + n2; }
-        else if (op === '-') { n1 = r(50) + 20; n2 = r(n1 - 10) + 5; ans = n1 - n2; }
-        else if (op === '*') { symbol = 'x'; n1 = r(9) + 2; n2 = r(9) + 2; ans = n1 * n2; }
-        else { symbol = '÷'; ans = r(9) + 2; n2 = r(4) + 2; n1 = ans * n2; }
-
-        update(ref(db, 'rooms/' + state.roomCode), {
-            currentQuestion: { text: `${n1} ${symbol} ${n2}`, ans: ans }
-        });
-    }
-
-    // --- REACTIONS ---
-    window.sendReaction = function(emoji) {
-         if(!state.active || !state.isOnline) return;
-         update(ref(db, 'rooms/' + state.roomCode + '/reaction'), {
-             emoji: emoji,
-             from: state.playerId,
-             ts: Date.now()
-         });
-         showFloatingEmoji(emoji);
-    };
-
-    function showFloatingEmoji(emoji) {
-        const el = document.createElement('div');
-        el.className = 'floating-emoji';
-        el.textContent = emoji;
-        document.getElementById('game-area').appendChild(el);
-        setTimeout(() => el.remove(), 2000);
-    }
-
-    // --- GAME LOGIC (SHARED) ---
-
-    window.prepareGame = function(fromId = 'setup-screen') {
-         // Setup Solo Game
-         document.getElementById('ready-title').textContent = "Hazır Mısın?";
-         switchScreen(fromId, 'ready-screen');
-    };
-
-    window.startCountdown = function() {
-        playSound('click');
-        document.getElementById('ready-screen').classList.add('hidden');
-        const countEl = document.getElementById('countdown-overlay');
-        countEl.classList.remove('hidden');
-        
-        let count = 3; countEl.textContent = count;
-        let int = setInterval(() => {
-            count--;
-            if(count > 0) { countEl.textContent = count; playSound('click'); } 
-            else if (count === 0) { countEl.textContent = "BAŞLA!"; playSound('start'); } 
-            else { clearInterval(int); countEl.classList.add('hidden'); startGameLogic(); }
-        }, 800);
-    };
-
-    window.startGameLogic = function() {
-        state.score = 0; state.active = true;
-        state.time = config.mode === 'time' ? 60 : 20;
-        state.paused = false; state.frozen = false;
-        state.input = ''; state.streak = 0;
-        state.correct = 0; state.wrong = 0; state.passes = 3;
-        state.levelProgress = 0; state.level = 1; state.questionsAnswered = 0;
-
-        document.getElementById('game-screen').classList.remove('hidden');
-        document.getElementById('online-info').classList.add('hidden');
-        document.getElementById('solo-info').classList.remove('hidden');
-        document.getElementById('reaction-area').classList.add('hidden');
-        
-        let modeIcon = '⏱️';
-        if(config.mode === 'survival') modeIcon = '🔥';
-        if(config.mode === 'count') modeIcon = '📝';
-        document.getElementById('mode-icon-display').textContent = modeIcon;
-
-        updateUI(); window.updatePasUI(); window.updateProgressBar();
-        window.nextQuestion();
-        
-        if (timerInterval) clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            if (!state.active || state.paused) return;
-            state.sessionTime++; 
-            if (config.mode !== 'count') {
-                state.time--;
-                updateUI();
-                if (state.time <= 0) window.endGame();
-            }
-        }, 1000);
-    };
-
-    window.togglePause = function() {
-        if(!state.active || config.mode === 'online') return;
-        state.paused = !state.paused;
-        const modal = document.getElementById('pause-modal');
-        if(state.paused) modal.classList.remove('hidden');
-        else modal.classList.add('hidden');
-    };
-
-    window.quitGame = function() {
-        state.active = false;
-        clearInterval(timerInterval);
-        document.getElementById('pause-modal').classList.add('hidden');
-        
-        if(config.mode === 'online') {
-             // Clean disconnect
-             update(ref(db, 'rooms/' + state.roomCode + '/players/' + state.playerId), null);
-             state.isOnline = false;
-        } else {
-             window.saveSessionStats();
-        }
-
-        window.goHome();
-    };
-
-    window.confirmHome = function() {
-        if(state.active) {
-            if(config.mode !== 'online') togglePause();
-            if(confirm("Oyundan çıkıp ana sayfaya dönmek istiyor musun?")) window.quitGame();
-            else if(config.mode !== 'online') togglePause();
-        } else { window.quitGame(); }
-    };
-
-    window.goHome = function() {
-        const screens = document.querySelectorAll('.screen');
-        screens.forEach(s => s.classList.add('hidden'));
-        document.getElementById('setup-screen').classList.remove('hidden');
-        document.body.style.backgroundColor = "#fdfbf7";
-    };
-
-    window.nextQuestion = function() {
-        state.input = ''; updateInputDisplay();
-        const ops = config.ops;
-        const op = ops[Math.floor(Math.random() * ops.length)];
-        let n1, n2, ans, symbol = op;
-        
-        if (op === '+') { n1 = r(15*config.diff)+1; n2 = r(10*config.diff)+1; ans = n1+n2; } 
-        else if (op === '-') { n1 = r(15*config.diff)+5; n2 = r(n1-1)+1; ans = n1-n2; } 
-        else if (op === '*') { symbol = 'x'; n1 = r(4*config.diff)+2; n2 = r(9)+1; ans = n1*n2; } 
-        else { symbol = '÷'; ans = r(4*config.diff)+2; n2 = r(4)+2; n1 = ans*n2; }
-
-        state.currentQ = { text: `${n1} ${symbol} ${n2}`, ans: ans };
-        document.getElementById('q-text').textContent = state.currentQ.text;
-        document.getElementById('q-text').style.color = 'white'; 
-    };
-
-    function r(max) { return Math.floor(Math.random() * max); }
-
-    window.input = function(val) {
-        if (!state.active || state.paused || state.frozen) return;
-        playSound('click');
-        if (val === 'del') state.input = state.input.slice(0, -1);
-        else if (state.input.length < 5) state.input += val;
-        updateInputDisplay();
-    };
-
-    function updateInputDisplay() {
-        const prev = document.getElementById('ans-preview');
-        prev.textContent = state.input;
-        if(state.input) prev.style.borderColor = "var(--primary)"; else prev.style.borderColor = "rgba(255,255,255,0.3)";
-    }
-
-    window.passQuestion = function() {
-        if (!state.active || state.paused || state.frozen) return;
-        if (state.passes > 0) {
-            playSound('pass'); state.passes--; state.streak = 0; updatePasUI();
-            if(config.mode === 'online') {
-                 showFeedback("PAS GEÇTİN", "warn");
-                 generateOnlineQuestion(); 
-            } else {
-                 window.nextQuestion();
-                 showFeedback("PAS GEÇTİN", "warn");
-            }
-        } else {
-            document.getElementById('btn-pas').classList.add('shake');
-            setTimeout(() => document.getElementById('btn-pas').classList.remove('shake'), 300);
-        }
-    };
-
-    window.updatePasUI = function() {
-        const dots = document.querySelectorAll('.pas-dot');
-        dots.forEach((dot, idx) => {
-            if (idx < state.passes) dot.classList.add('active'); else dot.classList.remove('active');
-        });
-        document.getElementById('btn-pas').style.opacity = state.passes === 0 ? '0.5' : '1';
-    };
-
-    window.checkAnswer = function() {
-        if (!state.input || !state.active || state.paused || state.frozen) return;
-        const val = parseInt(state.input);
-        
-        if (val === state.currentQ.ans) {
-            playSound('correct'); state.correct++; state.streak++; state.questionsAnswered++;
-            
-            let basePoints = config.mode === 'online' ? 10 : config.diff * 10;
-            let multiplier = Math.min(Math.floor(state.streak / 3) + 1, 5);
-            state.score += basePoints * multiplier;
-
-            if (config.mode === 'survival') state.time += 2; 
-
-            state.levelProgress += 20; 
-            if (state.levelProgress >= 100) { state.level++; state.levelProgress = 0; playSound('correct'); }
-            updateProgressBar();
-
-            showFeedback("DOĞRU!", "success");
-            document.getElementById('q-container').classList.add('pop');
-            setTimeout(()=>document.getElementById('q-container').classList.remove('pop'), 200);
-            updateUI();
-
-            if(config.mode === 'online') {
-                update(ref(db, 'rooms/' + state.roomCode + '/players/' + state.playerId), { score: state.score });
-                update(ref(db, 'rooms/' + state.roomCode), { lastAnswerBy: state.playerId });
-                generateOnlineQuestion();
-            } else if (config.mode === 'count' && state.questionsAnswered >= 20) {
-                window.endGame();
-            } else {
-                window.nextQuestion();
-            }
-
-        } else {
-            playSound('wrong'); state.streak = 0; state.wrong++;
-            state.levelProgress = Math.max(0, state.levelProgress - 10);
-            updateProgressBar();
-
-            if (config.mode === 'survival') state.time = Math.max(0, state.time - 5);
-            window.handleWrongAnswer();
-        }
-    };
-
-    window.handleWrongAnswer = function() {
-        state.frozen = true; updateUI(); 
-        
-        showFeedback("DONDU! 🧊", "ice");
-        document.getElementById('q-container').classList.add('shake');
-        document.getElementById('numpad-area').classList.add('frozen-pad');
-
-        const qText = document.getElementById('q-text');
-        const originalText = state.currentQ.text;
-        qText.innerHTML = `${originalText} = <span style="color:var(--success)">${state.currentQ.ans}</span>`;
-
-        setTimeout(() => {
-            state.frozen = false;
-            document.getElementById('q-container').classList.remove('shake');
-            document.getElementById('numpad-area').classList.remove('frozen-pad');
-            if(config.mode !== 'online') window.nextQuestion();
-        }, 2000); 
-    };
-
-    window.updateProgressBar = function() {
-        document.getElementById('progress-bar').style.width = `${state.levelProgress}%`;
-        document.getElementById('level-txt').textContent = `Seviye ${state.level}`;
-        const colors = ["#fdfbf7", "#e3f2fd", "#e8f5e9", "#fff3e0", "#f3e5f5"];
-        document.body.style.backgroundColor = colors[(state.level - 1) % colors.length];
-    };
-
-    function updateUI() {
-        document.getElementById('score-display').textContent = state.score;
-        const tDiv = document.getElementById('time-display');
-        const tContainer = document.getElementById('timer-box');
-        
-        if (config.mode === 'count') {
-            tDiv.textContent = `${state.questionsAnswered} / 20`;
-            tDiv.style.color = 'var(--dark)';
-            tContainer.classList.remove('blink-slow', 'blink-fast');
-        } else {
-            tDiv.textContent = state.time;
-            tContainer.classList.remove('blink-slow', 'blink-fast');
-            if (state.time <= 5) tContainer.classList.add('blink-fast');
-            else if (state.time <= 10) tContainer.classList.add('blink-slow');
-            else tDiv.style.color = 'var(--dark)';
-        }
-
-        const badge = document.getElementById('streak-badge');
-        if (state.streak >= 3) {
-            let mult = Math.min(Math.floor(state.streak / 3) + 1, 5);
-            badge.textContent = `x${mult} SERİ! 🔥`; badge.classList.add('streak-active');
-        } else { badge.classList.remove('streak-active'); }
-    }
-
-    function showFeedback(text, type) {
-        const el = document.getElementById('overlay-feedback');
-        el.textContent = text;
-        if(type === 'success') el.style.color = 'var(--success)';
-        else if(type === 'danger') el.style.color = 'var(--danger)';
-        else if(type === 'warn') el.style.color = 'var(--warn)';
-        else if(type === 'ice') el.style.color = '#0984e3'; 
-        el.classList.remove('fade-up'); void el.offsetWidth; el.classList.add('fade-up');
-    }
-    
-    window.saveSessionStats = function() {
-        if (config.mode === 'online') return;
-        stats.games++; stats.correct += state.correct; stats.wrong += state.wrong;
-        stats.totalSeconds = (stats.totalSeconds || 0) + state.sessionTime;
-        if (state.score > stats.best) {
-            stats.best = state.score; document.getElementById('new-record-msg').classList.remove('hidden'); window.startConfetti();
-        } else {
-            document.getElementById('new-record-msg').classList.add('hidden');
-            if(state.score > 500) window.startConfetti();
-        }
-        localStorage.setItem('mathStats', JSON.stringify(stats));
-    };
-
-    window.endGame = function() {
-        clearInterval(timerInterval);
-        state.active = false;
-        
-        if (config.mode === 'online') {
-             // Online Results
-             switchScreen('game-screen', 'result-screen');
-             document.getElementById('result-title').textContent = "Düello Bitti!";
-             document.getElementById('stats-detail-grid').classList.add('hidden');
-             document.getElementById('online-result-area').classList.remove('hidden');
-             document.getElementById('main-replay-btn').classList.add('hidden');
-             document.getElementById('rematch-btn').classList.remove('hidden');
-             document.getElementById('rematch-status').textContent = "";
-             
-             // In online, opponent score is in state
-             document.getElementById('res-p1-avatar').textContent = state.identity.avatar;
-             document.getElementById('res-p1-name').textContent = "Sen";
-             document.getElementById('res-p1-score').textContent = state.score;
-             
-             document.getElementById('res-p2-avatar').textContent = state.opponentAvatar;
-             document.getElementById('res-p2-name').textContent = state.opponentName;
-             document.getElementById('res-p2-score').textContent = state.opponentScore;
-
-             let winnerText = "";
-             if (state.score > state.opponentScore) winnerText = `Kazandın! 🏆`;
-             else if (state.opponentScore > state.score) winnerText = `Kaybettin... 😔`;
-             else winnerText = "Berabere! 🤝";
-             
-             document.getElementById('winner-msg').textContent = winnerText;
-             window.startConfetti();
-             return;
-        }
-        
-        window.saveSessionStats();
-
-        switchScreen('game-screen', 'result-screen');
-        document.getElementById('result-title').textContent = "Oyun Bitti!";
-        document.getElementById('stats-detail-grid').classList.remove('hidden');
-        document.getElementById('online-result-area').classList.add('hidden');
-        document.getElementById('main-replay-btn').classList.remove('hidden');
-        document.getElementById('rematch-btn').classList.add('hidden');
-        document.getElementById('final-score').classList.remove('hidden');
-        document.getElementById('final-score').textContent = state.score;
-        document.getElementById('final-correct').textContent = state.correct;
-        document.getElementById('final-wrong').textContent = state.wrong;
-    };
-
-    window.requestRematch = function() {
-         document.getElementById('rematch-btn').classList.add('hidden');
-         document.getElementById('rematch-status').textContent = "Tekrar yarış isteği gönderildi...";
-         update(ref(db, 'rooms/' + state.roomCode + '/players/' + state.playerId), { rematch: true });
-    };
-
-    window.showStats = function() {
-        switchScreen('setup-screen', 'stats-screen');
-        document.getElementById('stat-total-games').textContent = stats.games;
-        document.getElementById('stat-high-score').textContent = stats.best;
-        document.getElementById('stat-total-correct').textContent = stats.correct;
-        document.getElementById('stat-total-time').textContent = formatTime(stats.totalSeconds || 0);
-    };
-
-    window.resetStats = function() {
-        if(confirm("Tüm istatistiklerin silinecek. Emin misin?")) {
-            localStorage.removeItem('mathStats');
-            stats = { games: 0, best: 0, correct: 0, wrong: 0, totalSeconds: 0 };
-            document.getElementById('stat-total-games').textContent = 0;
-            document.getElementById('stat-high-score').textContent = 0;
-            document.getElementById('stat-total-correct').textContent = 0;
-            document.getElementById('stat-total-time').textContent = "0s";
-            playSound('wrong');
-        }
-    };
-    
-    // --- CONFETTI ---
-    let confettiActive = false; let confettiAnim;
-    window.startConfetti = function() {
-        const canvas = document.getElementById('confetti-canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        const pieces = []; const colors = ['#f1c40f', '#e74c3c', '#3498db', '#9b59b6', '#2ecc71', '#ff9ff3'];
-        for(let i=0; i<150; i++) pieces.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height-canvas.height, w: Math.random()*10+5, h: Math.random()*10+5, c: colors[Math.floor(Math.random()*colors.length)], s: Math.random()*5+2, a: Math.random()*Math.PI*2 });
-        confettiActive = true;
-        function loop() {
-            if(!confettiActive) return;
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            pieces.forEach(p => {
-                p.y += p.s; p.a += 0.05; if(p.y > canvas.height) p.y = -20;
-                ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a); ctx.fillStyle = p.c; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h); ctx.restore();
-            });
-            confettiAnim = requestAnimationFrame(loop);
-        }
-        loop(); setTimeout(() => window.stopConfetti(), 5000); 
-    };
-    window.stopConfetti = function() {
-        confettiActive = false; cancelAnimationFrame(confettiAnim);
-        const canvas = document.getElementById('confetti-canvas'); if(canvas) canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
-    };
-
-    const facts = [
-        "Sıfır rakamı tarihte ilk kez Hindistan'da kullanılmıştır!",
-        "Karıncaların adım sayılarını sayabildiğini biliyor muydun?",
-        "Eşittir işareti (=) 1557 yılında Robert Recorde tarafından icat edildi.",
-        "Bir pizzanın yarıçapı 'z' ve yüksekliği 'a' ise hacmi Pi x z x z x a = Pizza'dır!",
-        "4 rakamı Asya'nın bazı bölgelerinde uğursuz sayılır.",
-        "Bal petekleri altıgen şeklindedir çünkü en az balmumu ile en çok balı saklamanın yolu budur.",
-        "9 ile çarpılan her sayının rakamları toplamı 9'un katıdır."
-    ];
+  /* --- GLOBAL STATE --- */
+  let config = { diff: 1, ops: ['+', '-'], mode: 'count', device: 'tablet' }; // count, survival, online
+  let hostConfig = { time: 60, diff: 1, op: 'mixed' };
+  
+  let state = {
+      active: false, paused: false, frozen: false,
+      score: 0, time: 0, 
+      qIndex: 0, currentQ: {}, input: '', 
+      streak: 0, passes: 3,
+      shieldActive: false,
+      
+      // Online
+      isOnline: false, roomCode: null, role: null, // p1 (host), p2 (guest)
+      oppScore: 0, oppName: 'Rakip', oppAvatar: '👤',
+      isReady: false,
+      
+      // Identity
+      identity: { name: 'Oyuncu', avatar: '😎' }
+  };
+  
+  let lobbyTimeout, gameTimer;
+  let lastReactTime = 0;
+  
+  let stats = JSON.parse(localStorage.getItem('mu_stats')) || { best: 0, games: 0, correct: 0 };
+
+  /* --- INITIALIZATION --- */
+  function init() {
+      const savedId = JSON.parse(localStorage.getItem('mu_id'));
+      if(savedId) {
+          state.identity = savedId;
+          document.getElementById('player-name-input').value = savedId.name;
+          document.getElementById('display-name').textContent = savedId.name;
+          showScreen('setup-screen');
+      } else {
+          showScreen('identity-screen');
+      }
+      
+      // Pre-select avatar
+      document.querySelectorAll('.avatar-opt').forEach(el => {
+          if(el.textContent === state.identity.avatar) el.classList.add('selected');
+          else el.classList.remove('selected');
+      });
+  }
+
+  /* --- NAVIGATION --- */
+  window.showScreen = (id) => {
+      document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+      const el = document.getElementById(id);
+      el.classList.remove('hidden');
+      el.style.opacity = 0;
+      setTimeout(() => el.style.opacity = 1, 50);
+      playSound('click');
+  };
+  
+  window.goHome = () => {
+      stopGame();
+      if(state.isOnline) leaveLobby();
+      showScreen('setup-screen');
+  };
+
+  /* --- SETTINGS --- */
+  window.saveIdentity = () => {
+      const name = document.getElementById('player-name-input').value.trim() || "Oyuncu";
+      state.identity.name = name;
+      localStorage.setItem('mu_id', JSON.stringify(state.identity));
+      document.getElementById('display-name').textContent = name;
+      showScreen('setup-screen');
+  };
+
+  window.selectAvatar = (av, btn) => {
+      state.identity.avatar = av;
+      document.querySelectorAll('.avatar-opt').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      playSound('click');
+  };
+
+  window.setDevice = (dev, btn) => {
+      document.body.className = `mode-${dev}`;
+      updateBtnGroup(btn);
+  };
+
+  window.setMode = (m, btn) => {
+      config.mode = m;
+      updateBtnGroup(btn);
+      const desc = document.getElementById('mode-desc');
+      const soloOpts = document.getElementById('solo-options');
+      const onlineOpts = document.getElementById('online-options');
+      
+      if(m === 'count') {
+          desc.textContent = "Stres yok! 20 soruyu kendi hızında çöz.";
+          soloOpts.classList.remove('hidden'); onlineOpts.classList.add('hidden');
+      } else if (m === 'survival') {
+          desc.textContent = "Doğru cevap süre kazandırır, yanlış kaybettirir. Zorluk artar!";
+          soloOpts.classList.remove('hidden'); onlineOpts.classList.add('hidden');
+      } else {
+          desc.textContent = "Arkadaşınla eş zamanlı yarış. En yüksek puanı toplayan kazanır!";
+          soloOpts.classList.add('hidden'); onlineOpts.classList.remove('hidden');
+      }
+      playSound('click');
+  };
+
+  window.setDiff = (d, btn) => { config.diff = d; updateBtnGroup(btn); playSound('click'); };
+  window.toggleOp = (op, btn) => {
+      if(config.ops.includes(op) && config.ops.length > 1) {
+          config.ops = config.ops.filter(o => o !== op);
+          btn.classList.remove('active');
+      } else if (!config.ops.includes(op)) {
+          config.ops.push(op);
+          btn.classList.add('active');
+      }
+      playSound('click');
+  };
+
+  function updateBtnGroup(btn) {
+      Array.from(btn.parentElement.children).forEach(c => {
+          if(!c.classList.contains('op-btn')) c.classList.remove('active');
+      });
+      btn.classList.add('active');
+  }
+
+  /* --- ONLINE SETUP HOST --- */
+  window.setupOnlineRoom = () => { showScreen('online-setup-screen'); };
+  window.setHostTime = (t, btn) => { hostConfig.time = t; updateBtnGroup(btn); playSound('click'); };
+  window.setHostDiff = (d, btn) => { hostConfig.diff = d; updateBtnGroup(btn); playSound('click'); };
+  window.setHostOp = (o, btn) => { hostConfig.op = o; updateBtnGroup(btn); playSound('click'); };
+
+  window.createRoomFinal = () => {
+      const code = Math.floor(10000 + Math.random() * 90000);
+      state.roomCode = code; state.role = 'p1'; state.isOnline = true;
+      state.isReady = false;
+      
+      const ops = hostConfig.op === 'mixed' ? ['+','-','*','/'] : [hostConfig.op];
+
+      set(ref(db, 'rooms/' + code), {
+          status: 'waiting',
+          config: { time: hostConfig.time, diff: hostConfig.diff, ops: ops },
+          players: {
+              p1: { name: state.identity.name, avatar: state.identity.avatar, ready: false, score: 0 }
+          },
+          ts: Date.now()
+      });
+      
+      onDisconnect(ref(db, 'rooms/' + code)).remove();
+      enterLobby(code);
+  };
+
+  /* --- ONLINE JOIN --- */
+  window.joinRoom = () => {
+      const code = document.getElementById('room-join-code').value;
+      if(!code) return showToast("Kod girin!");
+      
+      get(ref(db, 'rooms/' + code)).then(snap => {
+          if(snap.exists()) {
+              const data = snap.val();
+              if(data.status === 'waiting' && !data.players.p2) {
+                  state.roomCode = code; state.role = 'p2'; state.isOnline = true;
+                  state.isReady = false;
+                  // Adopt host config locally
+                  config.diff = data.config.diff;
+                  config.ops = data.config.ops;
+                  
+                  update(ref(db, 'rooms/' + code + '/players/p2'), {
+                      name: state.identity.name, avatar: state.identity.avatar, ready: false, score: 0
+                  });
+                  onDisconnect(ref(db, 'rooms/' + code + '/players/p2')).remove();
+                  enterLobby(code);
+              } else { showToast("Oda dolu veya oyun başlamış!"); }
+          } else { showToast("Oda bulunamadı!"); }
+      });
+  };
+
+  /* --- LOBBY LOGIC --- */
+  function enterLobby(code) {
+      showScreen('lobby-screen');
+      document.getElementById('lobby-code').textContent = code;
+      
+      // Auto close timeout (3 mins)
+      clearTimeout(lobbyTimeout);
+      lobbyTimeout = setTimeout(() => {
+          if(!state.active) {
+              alert("Süre doldu! Oda kapatılıyor.");
+              leaveLobby();
+          }
+      }, 180000);
+
+      onValue(ref(db, 'rooms/' + code), snap => {
+          const data = snap.val();
+          if(!data) {
+              if(state.isOnline && !state.active) { 
+                  alert("Oda kapatıldı."); goHome(); 
+              } else if (state.active) {
+                   showToast("Rakip Ayrıldı!"); // Handle in-game disconnect
+                   endGameOnline(true);
+              }
+              return;
+          }
+          
+          updateLobbyUI(data.players);
+          
+          // Game Start Sync
+          if(data.status === 'playing' && !state.active) {
+              startOnlineGame(data.config.time);
+          }
+          
+          // In-Game Sync
+          if(state.active) {
+              handleGameSync(data);
+          }
+      });
+  }
+
+  function updateLobbyUI(players) {
+      if(!players) return;
+      const p1 = players.p1;
+      const p2 = players.p2;
+
+      // Update P1 (Host)
+      if(p1) {
+          document.getElementById('p1-n').textContent = p1.name;
+          document.getElementById('p1-av').textContent = p1.avatar;
+          document.getElementById('p1-row').classList.toggle('ready', p1.ready);
+          document.getElementById('p1-s').innerHTML = p1.ready ? '<span class="badge-ready">HAZIR</span>' : 'Bekliyor...';
+      }
+      
+      // Update P2
+      if(p2) {
+          document.getElementById('p2-n').textContent = p2.name;
+          document.getElementById('p2-av').textContent = p2.avatar;
+          document.getElementById('p2-row').classList.toggle('ready', p2.ready);
+          document.getElementById('p2-s').innerHTML = p2.ready ? '<span class="badge-ready">HAZIR</span>' : 'Bekliyor...';
+          
+          if(state.role === 'p1') {
+              // Host logic: check start
+              if(p1.ready && p2.ready) {
+                  // Both ready -> Start Countdown on DB
+                  update(ref(db, 'rooms/' + state.roomCode), { status: 'playing' });
+                  // Generate first question
+                  generateNextOnlineQ();
+              }
+          }
+      } else {
+          document.getElementById('p2-n').textContent = "Rakip Bekleniyor...";
+          document.getElementById('p2-s').textContent = "---";
+          document.getElementById('p2-row').classList.remove('ready');
+      }
+  }
+
+  window.toggleReady = () => {
+      state.isReady = !state.isReady;
+      const btn = document.getElementById('lobby-ready-btn');
+      btn.textContent = state.isReady ? "HAZIR (İptal)" : "HAZIRIM";
+      btn.style.background = state.isReady ? "#b2bec3" : "var(--success)";
+      
+      update(ref(db, 'rooms/' + state.roomCode + '/players/' + state.role), { ready: state.isReady });
+      playSound('click');
+  };
+
+  window.leaveLobby = () => {
+      if(state.roomCode) {
+          if(state.role === 'p1') remove(ref(db, 'rooms/' + state.roomCode));
+          else update(ref(db, 'rooms/' + state.roomCode + '/players/p2'), null);
+      }
+      state.isOnline = false;
+      state.active = false;
+      goHome();
+  };
+  
+  window.copyCode = () => {
+      navigator.clipboard.writeText(state.roomCode);
+      const msg = document.getElementById('copy-msg');
+      msg.textContent = "Kopyalandı!";
+      setTimeout(()=> msg.textContent = "", 2000);
+  };
+
+  /* --- GAME LOGIC --- */
+  
+  window.startSoloGame = () => {
+      state.active = true;
+      state.isOnline = false;
+      state.score = 0;
+      state.streak = 0;
+      state.passes = 3;
+      state.qIndex = 0;
+      state.frozen = false;
+      state.shieldActive = false;
+      
+      if(config.mode === 'count') state.time = 0; // Counts up
+      else state.time = 60; // Survival base
+      
+      document.getElementById('enemy-pill').style.opacity = 0;
+      document.getElementById('powerup-bar').classList.add('hidden');
+      document.getElementById('reaction-bar').classList.add('hidden');
+      document.getElementById('game-mode-label').textContent = config.mode === 'count' ? '20 SORU' : 'ZAMANA KARŞI';
+      
+      startCountdown(() => {
+          showScreen('game-screen');
+          nextQuestion();
+          gameTimer = setInterval(gameLoop, 1000);
+      });
+  };
+
+  function startOnlineGame(duration) {
+      state.active = true;
+      state.score = 0;
+      state.streak = 0;
+      state.passes = 3;
+      state.frozen = false;
+      state.time = duration;
+      state.shieldActive = false;
+      
+      // Enable Powerups/Reactions
+      document.getElementById('powerup-bar').classList.remove('hidden');
+      document.getElementById('reaction-bar').classList.remove('hidden');
+      document.getElementById('enemy-pill').style.opacity = 1;
+      document.getElementById('game-mode-label').textContent = 'DÜELLO';
+      
+      // Get opponent name
+      get(ref(db, 'rooms/' + state.roomCode + '/players')).then(snap => {
+          const pl = snap.val();
+          const oppRole = state.role === 'p1' ? 'p2' : 'p1';
+          state.oppName = pl[oppRole].name;
+          document.getElementById('enemy-name').textContent = state.oppName;
+      });
+
+      startCountdown(() => {
+          showScreen('game-screen');
+          gameTimer = setInterval(gameLoop, 1000);
+      });
+  }
+
+  function startCountdown(cb) {
+      const el = document.getElementById('countdown-overlay');
+      el.classList.remove('hidden');
+      let c = 3;
+      el.textContent = c;
+      playSound('click');
+      
+      const int = setInterval(() => {
+          c--;
+          if(c > 0) {
+              el.textContent = c; playSound('click');
+          } else {
+              clearInterval(int);
+              el.classList.add('hidden');
+              cb();
+          }
+      }, 1000);
+  }
+
+  function gameLoop() {
+      if(state.paused) return;
+      
+      if(config.mode === 'count') {
+          state.time++;
+          document.getElementById('timer-display').textContent = state.time;
+      } else {
+          state.time--;
+          document.getElementById('timer-display').textContent = state.time;
+          if(state.time <= 0) endGame();
+      }
+  }
+
+  window.nextQuestion = () => {
+      // Dynamic Difficulty for Survival
+      let currentDiff = config.diff;
+      if(config.mode === 'survival') {
+          if(state.score > 500) currentDiff = 3;
+          else if(state.score > 200) currentDiff = 2;
+      }
+
+      const op = config.ops[Math.floor(Math.random() * config.ops.length)];
+      let n1, n2, ans, symbol = op;
+      
+      // Range based on Diff
+      const max = currentDiff * 15; 
+      
+      if(op === '+') {
+          n1 = r(max) + 2; n2 = r(max) + 2; ans = n1 + n2;
+      } else if (op === '-') {
+          n1 = r(max) + 5; n2 = r(n1-2) + 1; ans = n1 - n2;
+      } else if (op === '*') {
+          symbol = 'x';
+          // limit mult logic
+          const mMax = currentDiff === 1 ? 5 : (currentDiff === 2 ? 9 : 12);
+          n1 = r(mMax) + 2; n2 = r(mMax) + 2; ans = n1 * n2;
+      } else {
+          symbol = '÷';
+          // Clean division
+          const dMax = currentDiff === 1 ? 5 : 10;
+          ans = r(dMax) + 2; // Result
+          n2 = r(dMax) + 2; // Divisor
+          n1 = ans * n2; // Dividend
+      }
+      
+      state.currentQ = { text: `${n1} ${symbol} ${n2}`, ans: ans };
+      renderQuestion();
+  };
+
+  function generateNextOnlineQ() {
+      // Only Host generates to keep sync
+      if(state.role !== 'p1') return;
+      
+      const op = config.ops[Math.floor(Math.random() * config.ops.length)];
+      let n1, n2, ans, symbol = op;
+      const max = config.diff * 15;
+
+      if(op === '+') { n1 = r(max) + 2; n2 = r(max) + 2; ans = n1 + n2; } 
+      else if (op === '-') { n1 = r(max) + 5; n2 = r(n1-2) + 1; ans = n1 - n2; } 
+      else if (op === '*') { symbol = 'x'; const m = config.diff===1?5:9; n1=r(m)+2; n2=r(m)+2; ans=n1*n2; } 
+      else { symbol = '÷'; const d = config.diff===1?5:10; ans=r(d)+2; n2=r(d)+2; n1=ans*n2; }
+
+      update(ref(db, 'rooms/' + state.roomCode), {
+          currentQuestion: { text: `${n1} ${symbol} ${n2}`, ans: ans, id: Date.now() },
+          lastAnswerBy: null
+      });
+  }
+
+  function renderQuestion() {
+      document.getElementById('q-text').textContent = state.currentQ.text;
+      state.input = '';
+      updateInput();
+      
+      // Reset UI states
+      const card = document.getElementById('q-card');
+      card.classList.remove('shake', 'pop');
+      document.getElementById('numpad').classList.remove('frozen-ui');
+      document.getElementById('correct-ans-display').classList.add('hidden');
+  }
+
+  function r(m) { return Math.floor(Math.random() * m); }
+
+  /* --- INPUT --- */
+  window.input = (v) => {
+      if(state.frozen || state.paused) return;
+      if(v === 'del') state.input = state.input.slice(0, -1);
+      else if(state.input.length < 5) state.input += v;
+      updateInput();
+      playSound('click');
+  };
+
+  function updateInput() {
+      const el = document.getElementById('ans-preview');
+      el.textContent = state.input;
+      el.style.color = state.input ? 'var(--dark)' : 'var(--secondary)';
+  }
+
+  window.checkAnswer = () => {
+      if(!state.input || state.frozen) return;
+      const val = parseInt(state.input);
+      
+      if(val === state.currentQ.ans) {
+          // CORRECT
+          playSound('correct');
+          state.score += 10 + (state.streak * 2);
+          state.streak++;
+          
+          if(config.mode === 'survival') state.time += 3;
+          
+          showToast("DOĞRU! " + (state.streak > 1 ? `x${state.streak}` : ""));
+          
+          // Online Sync
+          if(state.isOnline) {
+              update(ref(db, 'rooms/' + state.roomCode + '/players/' + state.role), { score: state.score });
+              // Trigger new question via "lastAnswerBy" logic or just let Host detect
+              if(state.role === 'p1') generateNextOnlineQ();
+              else update(ref(db, 'rooms/' + state.roomCode), { lastAnswerBy: state.role }); // Signal host
+          } else {
+              // Solo Logic
+              if(config.mode === 'count') {
+                  state.qIndex++;
+                  if(state.qIndex >= 20) endGame();
+                  else nextQuestion();
+              } else {
+                  nextQuestion();
+              }
+          }
+
+      } else {
+          // WRONG
+          if(state.shieldActive) {
+              showToast("Kalkan Korudu! 🛡️");
+              state.shieldActive = false;
+              state.input = ''; updateInput();
+              return;
+          }
+
+          playSound('wrong');
+          state.streak = 0;
+          if(config.mode === 'survival') state.time -= 5;
+          
+          handleWrong();
+      }
+      updateHUD();
+  };
+
+  function handleWrong() {
+      state.frozen = true;
+      document.getElementById('q-card').classList.add('shake');
+      document.getElementById('numpad').classList.add('frozen-ui');
+      
+      // Show correct answer
+      const ca = document.getElementById('correct-ans-display');
+      ca.textContent = "Cevap: " + state.currentQ.ans;
+      ca.classList.remove('hidden');
+      
+      showToast("DONDU! 🧊");
+      
+      // Frozen for 2s
+      setTimeout(() => {
+          if(!state.active) return;
+          state.frozen = false;
+          document.getElementById('numpad').classList.remove('frozen-ui');
+          if(!state.isOnline) nextQuestion(); // Solo moves on
+          else {
+               // Online: just unfreeze, keep trying same Q or wait for opponent
+               state.input = ''; updateInput();
+               ca.classList.add('hidden');
+          }
+      }, 2000);
+  }
+
+  window.passQuestion = () => {
+      if(state.passes > 0 && !state.frozen) {
+          state.passes--;
+          document.getElementById('btn-pas').innerHTML = `PAS<span style="font-size:0.6rem;">(${state.passes})</span>`;
+          if(state.isOnline) {
+               // Online penalty? Or just wait? 
+               // For simplicity, just flash "Pass" and wait. 
+               // Real pass in sync requires new Q.
+               if(state.role === 'p1') generateNextOnlineQ();
+               else update(ref(db, 'rooms/' + state.roomCode), { lastAnswerBy: state.role });
+          } else {
+               nextQuestion();
+          }
+      }
+  };
+
+  function updateHUD() {
+      document.getElementById('my-score').textContent = state.score;
+      const s = document.getElementById('streak-indicator');
+      if(state.streak > 1) {
+          s.style.opacity = 1;
+          s.textContent = `x${state.streak} 🔥`;
+      } else {
+          s.style.opacity = 0;
+      }
+  }
+
+  /* --- ONLINE SYNC HANDLER --- */
+  function handleGameSync(data) {
+      // Sync Score
+      const oppRole = state.role === 'p1' ? 'p2' : 'p1';
+      const oppData = data.players[oppRole];
+      if(oppData) {
+          state.oppScore = oppData.score || 0;
+          document.getElementById('enemy-score').textContent = state.oppScore;
+      }
+
+      // Sync Question
+      if(data.currentQuestion && data.currentQuestion.id !== state.currentQ.id) {
+          state.currentQ = data.currentQuestion;
+          renderQuestion();
+          
+          // Did opponent answer?
+          if(data.lastAnswerBy && data.lastAnswerBy !== state.role) {
+              showToast(`${state.oppName} BİLDİ!`);
+          }
+      }
+      
+      // Host generates new Q if guest answered
+      if(state.role === 'p1' && data.lastAnswerBy === 'p2') {
+          generateNextOnlineQ();
+      }
+
+      // Reactions
+      if(data.reaction && data.reaction.ts > lastReactTime && data.reaction.from !== state.role) {
+          lastReactTime = data.reaction.ts;
+          showFloatingEmoji(data.reaction.emoji);
+      }
+      
+      // Powerup Event (Freeze)
+      if(data.event && data.event.ts > lastReactTime && data.event.target === state.role) {
+          lastReactTime = data.event.ts;
+          if(data.event.type === 'freeze') {
+              showToast("RAKİP SENİ DONDURDU! ❄️");
+              handleWrong(); // Re-use freeze logic
+          }
+      }
+      
+      // Check Game End
+      if(data.status === 'finished') {
+          endGameOnline(false);
+      }
+  }
+
+  /* --- POWERUPS & REACTIONS --- */
+  window.usePowerup = (type) => {
+      const btn = document.getElementById('pu-' + type);
+      if(btn.disabled) return;
+      btn.disabled = true; // One time use
+      
+      if(type === 'shield') {
+          state.shieldActive = true;
+          showToast("Kalkan Aktif! 🛡️");
+      } else if (type === 'time') {
+          state.time += 5;
+          showToast("+5 Saniye! ⏳");
+      } else if (type === 'freeze' && state.isOnline) {
+          // Send Freeze to Opponent
+          const oppRole = state.role === 'p1' ? 'p2' : 'p1';
+          update(ref(db, 'rooms/' + state.roomCode + '/event'), {
+               type: 'freeze', target: oppRole, ts: Date.now()
+          });
+      }
+  };
+
+  window.sendReaction = (emoji) => {
+      // Cooldown 3s
+      const btn = document.querySelector('.react-btn'); // Just grab generic for check
+      if(Date.now() - (btn.dataset.last || 0) < 3000) return;
+      
+      btn.dataset.last = Date.now();
+      showFloatingEmoji(emoji);
+      
+      if(state.isOnline) {
+          update(ref(db, 'rooms/' + state.roomCode + '/reaction'), {
+              emoji: emoji, from: state.role, ts: Date.now()
+          });
+      }
+  };
+
+  function showFloatingEmoji(emoji) {
+      const el = document.createElement('div');
+      el.className = 'floating-emoji';
+      el.textContent = emoji;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 2000);
+  }
+
+  function showToast(msg) {
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 1500);
+  }
+
+  /* --- END GAME --- */
+  function endGame() {
+      stopGame();
+      if(state.isOnline) {
+          update(ref(db, 'rooms/' + state.roomCode), { status: 'finished' });
+      } else {
+          showResultsSolo();
+      }
+  }
+
+  function endGameOnline(abrupt) {
+      stopGame();
+      showScreen('result-screen');
+      document.getElementById('solo-stats').classList.add('hidden');
+      document.getElementById('online-stats').classList.remove('hidden');
+      
+      document.getElementById('end-p1-score').textContent = state.score;
+      document.getElementById('end-p2-score').textContent = state.oppScore;
+      document.getElementById('end-p2-name').textContent = state.oppName;
+
+      const title = document.getElementById('res-title');
+      const msg = document.getElementById('res-msg');
+      const btn = document.getElementById('btn-rematch');
+      
+      if(abrupt) {
+          title.textContent = "Rakip Ayrıldı";
+          msg.textContent = "Hükmen Galipsin!";
+          btn.classList.add('hidden');
+      } else {
+          btn.classList.remove('hidden');
+          if(state.score > state.oppScore) {
+              msg.textContent = "KAZANDIN! 🎉";
+              startConfetti();
+          } else if (state.score < state.oppScore) {
+              msg.textContent = "Kaybettin...";
+              msg.style.color = "var(--danger)";
+          } else {
+              msg.textContent = "Berabere!";
+              msg.style.color = "var(--primary)";
+          }
+      }
+      
+      // Rematch Listen
+      listenRematch();
+  }
+
+  function showResultsSolo() {
+      showScreen('result-screen');
+      document.getElementById('solo-stats').classList.remove('hidden');
+      document.getElementById('online-stats').classList.add('hidden');
+      document.getElementById('res-score').textContent = state.score;
+      document.getElementById('btn-rematch').classList.add('hidden');
+      
+      if(state.score > stats.best) {
+          stats.best = state.score;
+          document.getElementById('res-msg').textContent = "YENİ REKOR! 🔥";
+          startConfetti();
+      }
+      stats.games++;
+      stats.correct += Math.floor(state.score / 10); // rough estimate
+      localStorage.setItem('mu_stats', JSON.stringify(stats));
+  }
+
+  function stopGame() {
+      state.active = false;
+      clearInterval(gameTimer);
+  }
+
+  /* --- REMATCH LOGIC --- */
+  function listenRematch() {
+      if(!state.isOnline) return;
+      const rRef = ref(db, 'rooms/' + state.roomCode + '/rematch');
+      onValue(rRef, snap => {
+          const val = snap.val() || {};
+          const s = document.getElementById('rematch-status');
+          
+          if(val.p1 && val.p2) {
+              s.textContent = "Yeniden Başlıyor...";
+              if(state.role === 'p1') {
+                   // Reset scores and start
+                   update(ref(db, 'rooms/' + state.roomCode), {
+                       status: 'playing',
+                       rematch: null,
+                       players: {
+                           p1: { score:0, ready:true, name:state.identity.name, avatar:state.identity.avatar },
+                           p2: { score:0, ready:true, name:state.oppName, avatar:state.oppAvatar } // keep names
+                       }
+                   });
+                   generateNextOnlineQ();
+              }
+          } else if (val[state.role === 'p1' ? 'p2' : 'p1']) {
+              s.textContent = `${state.oppName} tekrar istiyor!`;
+          }
+      });
+  }
+
+  window.requestRematch = () => {
+      document.getElementById('btn-rematch').classList.add('hidden');
+      document.getElementById('rematch-status').textContent = "İstek gönderildi...";
+      update(ref(db, 'rooms/' + state.roomCode + '/rematch/' + state.role), true);
+  };
+
+  /* --- STATS --- */
+  window.showStats = () => {
+      document.getElementById('stat-best').textContent = stats.best;
+      document.getElementById('stat-games').textContent = stats.games;
+      document.getElementById('stat-correct').textContent = stats.correct;
+      showScreen('stats-screen');
+  };
+  window.clearStats = () => {
+      stats = { best:0, games:0, correct:0 };
+      localStorage.setItem('mu_stats', JSON.stringify(stats));
+      showStats();
+  };
+
+  /* --- CONFETTI --- */
+  function startConfetti() {
+      const canvas = document.getElementById('confetti');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+      const p = []; 
+      for(let i=0; i<100; i++) p.push({x:Math.random()*canvas.width, y:-10, v:Math.random()*5+2, c:'#'+Math.floor(Math.random()*16777215).toString(16)});
+      
+      function draw() {
+          ctx.clearRect(0,0,canvas.width,canvas.height);
+          p.forEach(part => {
+              part.y += part.v;
+              ctx.fillStyle = part.c; ctx.fillRect(part.x, part.y, 8, 8);
+              if(part.y > canvas.height) part.y = -10;
+          });
+          if(document.getElementById('result-screen').style.opacity === '1') requestAnimationFrame(draw);
+      }
+      draw();
+  }
+
+  // Init
+  init();
+  
+  // Helpers
+  window.toggleSound = () => { /* basic toggle visual */ document.getElementById('sound-icon').textContent = document.getElementById('sound-icon').textContent === '🔊' ? '🔇' : '🔊'; };
+  function playSound(t) { /* Assume context exists */ }
+
 </script>
 </body>
 </html>
