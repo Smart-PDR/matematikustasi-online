@@ -41,10 +41,11 @@
         /* Developer Signature */
         .dev-signature {
             position: fixed; bottom: 15px; right: 20px;
-            font-family: 'Fira Code', monospace; font-size: 0.8rem;
-            color: rgba(0,0,0,0.4); text-align: right; pointer-events: none; z-index: 9999;
-            background: rgba(255,255,255,0.3); padding: 5px 10px; border-radius: 10px;
-            backdrop-filter: blur(2px); border: 1px solid rgba(255,255,255,0.2);
+            font-family: 'Fira Code', monospace; font-size: 0.85rem;
+            color: rgba(0,0,0,0.5); text-align: right; pointer-events: none; z-index: 9999;
+            background: rgba(255,255,255,0.4); padding: 5px 12px; border-radius: 12px;
+            backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
         .dev-signature strong { font-weight: 700; color: var(--primary); }
 
@@ -100,6 +101,8 @@
             font-family: 'Fredoka', sans-serif;
         }
         .big-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #009476; }
+        .big-btn.disabled { opacity: 0.6; pointer-events: none; filter: grayscale(1); }
+        
         .btn-red { background: var(--danger); box-shadow: 0 6px 0 #c0392b; }
         .btn-red:active { box-shadow: 0 2px 0 #c0392b; }
         .btn-blue { background: #0984e3; box-shadow: 0 6px 0 #006eb3; }
@@ -119,6 +122,12 @@
             outline: none; transition: 0.3s;
         }
         .inp-text:focus { border-color: var(--primary); background: #f8f7ff; }
+        
+        /* Modern Input for Code */
+        #room-join-code {
+            font-size: 1.5rem; letter-spacing: 2px; border: 3px solid var(--primary);
+            background: #fff; color: var(--primary); width: 140px; padding: 10px;
+        }
 
         /* Online Lobby */
         .lobby-code-box {
@@ -306,9 +315,9 @@
                     <button class="big-btn btn-blue" style="margin:0; flex:1;" onclick="setupOnlineRoom()">ODA KUR</button>
                 </div>
                 <div style="margin:15px 0; font-weight:700; color:#b2bec3;">- VEYA -</div>
-                <div style="display:flex; gap:5px;">
-                    <input id="room-join-code" type="number" class="inp-text" placeholder="Oda Kodu" style="font-size:1rem;">
-                    <button class="big-btn" style="margin:0; width:auto; padding:0 20px;" onclick="joinRoom()">KATIL</button>
+                <div style="display:flex; gap:10px; justify-content:center;">
+                    <input id="room-join-code" type="number" class="inp-text" placeholder="Kod" style="font-size:1.5rem; width:120px;">
+                    <button class="big-btn" style="margin:0; width:auto; padding:0 30px;" onclick="joinRoom()">KATIL</button>
                 </div>
             </div>
         </div>
@@ -494,7 +503,7 @@
 <!-- Firebase & Logic -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-  import { getDatabase, ref, set, onValue, update, remove, get, onDisconnect } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+  import { getDatabase, ref, set, onValue, update, remove, get, onDisconnect, off } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyD4zIUFTJEzFrDc6UTKTRPFtAvsM3t97z0",
@@ -531,6 +540,8 @@
   
   let lobbyTimeout, gameTimer;
   let lastReactTime = 0;
+  let lastEventTime = 0;
+  let activeRoomListener = null; // Listener reference cleanup
   
   let stats = JSON.parse(localStorage.getItem('mu_stats')) || { best: 0, games: 0, correct: 0 };
   let soundEnabled = true;
@@ -692,10 +703,7 @@
       state.isReady = false;
       
       const ops = hostConfig.op === 'mixed' ? ['+','-','*','/'] : [hostConfig.op];
-      
-      // Important: Host adopts their own config for the game immediately
-      config.diff = hostConfig.diff;
-      config.ops = ops;
+      config.diff = hostConfig.diff; config.ops = ops;
 
       set(ref(db, 'rooms/' + code), {
           status: 'waiting',
@@ -721,9 +729,7 @@
               if(data.status === 'waiting' && !data.players.p2) {
                   state.roomCode = code; state.role = 'p2'; state.isOnline = true;
                   state.isReady = false;
-                  // Adopt host config locally
-                  config.diff = data.config.diff;
-                  config.ops = data.config.ops;
+                  config.diff = data.config.diff; config.ops = data.config.ops;
                   
                   update(ref(db, 'rooms/' + code + '/players/p2'), {
                       name: state.identity.name, avatar: state.identity.avatar, ready: false, score: 0
@@ -740,46 +746,32 @@
       showScreen('lobby-screen');
       document.getElementById('lobby-code').textContent = code;
       
-      // Auto close timeout (3 mins)
       clearTimeout(lobbyTimeout);
       lobbyTimeout = setTimeout(() => {
-          if(!state.active) {
-              alert("Süre doldu! Oda kapatılıyor.");
-              leaveLobby();
-          }
+          if(!state.active) { alert("Süre doldu! Oda kapatılıyor."); leaveLobby(); }
       }, 180000);
 
-      onValue(ref(db, 'rooms/' + code), snap => {
+      const roomRef = ref(db, 'rooms/' + code);
+      activeRoomListener = onValue(roomRef, snap => {
           const data = snap.val();
           if(!data) {
-              if(state.isOnline && !state.active) { 
-                  alert("Oda kapatıldı."); goHome(); 
-              } else if (state.active) {
-                   showToast("Rakip Ayrıldı!"); // Handle in-game disconnect
-                   endGameOnline(true);
-              }
+              if(state.isOnline && !state.active) { alert("Oda kapatıldı."); goHome(); }
+              else if (state.active) { showToast("Rakip Ayrıldı!"); endGameOnline(true); }
               return;
           }
           
           updateLobbyUI(data.players);
 
-          // HOST LOGIC: Check if everyone is ready and start game
-          // Only if status is still 'waiting' to prevent loops
-          if(state.role === 'p1' && data.status === 'waiting' && data.players && data.players.p1 && data.players.p2) {
-              if(data.players.p1.ready && data.players.p2.ready) {
-                  // Both ready -> Start Countdown on DB
-                  update(ref(db, 'rooms/' + code), { status: 'playing' });
-                  // Generate first question
-                  generateNextOnlineQ();
-              }
+          // Host Logic to Start Game
+          if(state.role === 'p1' && data.status === 'waiting' && data.players?.p1?.ready && data.players?.p2?.ready) {
+              update(ref(db, 'rooms/' + code), { status: 'playing' });
+              generateNextOnlineQ();
           }
           
-          // Game Start Sync (Both Players)
           if(data.status === 'playing' && !state.active) {
               startOnlineGame(data.config.time);
           }
           
-          // In-Game Sync
           if(state.active) {
               handleGameSync(data);
           }
@@ -791,7 +783,6 @@
       const p1 = players.p1;
       const p2 = players.p2;
 
-      // Update P1 (Host)
       if(p1) {
           document.getElementById('p1-n').textContent = p1.name;
           document.getElementById('p1-av').textContent = p1.avatar;
@@ -799,7 +790,6 @@
           document.getElementById('p1-s').innerHTML = p1.ready ? '<span class="badge-ready">HAZIR</span>' : 'Bekliyor...';
       }
       
-      // Update P2
       if(p2) {
           document.getElementById('p2-n').textContent = p2.name;
           document.getElementById('p2-av').textContent = p2.avatar;
@@ -823,6 +813,9 @@
   };
 
   window.leaveLobby = () => {
+      if (activeRoomListener && state.roomCode) {
+         off(ref(db, 'rooms/' + state.roomCode), 'value', activeRoomListener);
+      }
       if(state.roomCode) {
           if(state.role === 'p1') remove(ref(db, 'rooms/' + state.roomCode));
           else update(ref(db, 'rooms/' + state.roomCode + '/players/p2'), null);
@@ -844,15 +837,11 @@
   window.startSoloGame = () => {
       state.active = true;
       state.isOnline = false;
-      state.score = 0;
-      state.streak = 0;
-      state.passes = 3;
-      state.qIndex = 0;
-      state.frozen = false;
-      state.shieldActive = false;
+      state.score = 0; state.streak = 0; state.passes = 3; state.qIndex = 0;
+      state.frozen = false; state.shieldActive = false;
       
-      if(config.mode === 'count') state.time = 0; // Counts up
-      else state.time = 60; // Survival base
+      if(config.mode === 'count') state.time = 0;
+      else state.time = 60;
       
       document.getElementById('enemy-pill').style.opacity = 0;
       document.getElementById('powerup-bar').classList.add('hidden');
@@ -867,21 +856,16 @@
   };
 
   function startOnlineGame(duration) {
+      if(state.active) return; // Prevent double start
       state.active = true;
-      state.score = 0;
-      state.streak = 0;
-      state.passes = 3;
-      state.frozen = false;
-      state.time = duration;
-      state.shieldActive = false;
+      state.score = 0; state.streak = 0; state.passes = 3; state.frozen = false;
+      state.time = duration; state.shieldActive = false;
       
-      // Enable Powerups/Reactions
       document.getElementById('powerup-bar').classList.remove('hidden');
       document.getElementById('reaction-bar').classList.remove('hidden');
       document.getElementById('enemy-pill').style.opacity = 1;
       document.getElementById('game-mode-label').textContent = 'DÜELLO';
       
-      // Get opponent name
       get(ref(db, 'rooms/' + state.roomCode + '/players')).then(snap => {
           const pl = snap.val();
           if(pl) {
@@ -900,25 +884,17 @@
   function startCountdown(cb) {
       const el = document.getElementById('countdown-overlay');
       el.classList.remove('hidden');
-      let c = 3;
-      el.textContent = c;
-      playSound('click');
+      let c = 3; el.textContent = c; playSound('click');
       
       const int = setInterval(() => {
           c--;
-          if(c > 0) {
-              el.textContent = c; playSound('click');
-          } else {
-              clearInterval(int);
-              el.classList.add('hidden');
-              cb();
-          }
+          if(c > 0) { el.textContent = c; playSound('click'); } 
+          else { clearInterval(int); el.classList.add('hidden'); cb(); }
       }, 1000);
   }
 
   function gameLoop() {
       if(state.paused) return;
-      
       if(config.mode === 'count') {
           state.time++;
           document.getElementById('timer-display').textContent = state.time;
@@ -930,7 +906,6 @@
   }
 
   window.nextQuestion = () => {
-      // Dynamic Difficulty for Survival
       let currentDiff = config.diff;
       if(config.mode === 'survival') {
           if(state.score > 500) currentDiff = 3;
@@ -939,34 +914,18 @@
 
       const op = config.ops[Math.floor(Math.random() * config.ops.length)];
       let n1, n2, ans, symbol = op;
-      
-      // Range based on Diff
       const max = currentDiff * 15; 
       
-      if(op === '+') {
-          n1 = r(max) + 2; n2 = r(max) + 2; ans = n1 + n2;
-      } else if (op === '-') {
-          n1 = r(max) + 5; n2 = r(n1-2) + 1; ans = n1 - n2;
-      } else if (op === '*') {
-          symbol = 'x';
-          // limit mult logic
-          const mMax = currentDiff === 1 ? 5 : (currentDiff === 2 ? 9 : 12);
-          n1 = r(mMax) + 2; n2 = r(mMax) + 2; ans = n1 * n2;
-      } else {
-          symbol = '÷';
-          // Clean division
-          const dMax = currentDiff === 1 ? 5 : 10;
-          ans = r(dMax) + 2; // Result
-          n2 = r(dMax) + 2; // Divisor
-          n1 = ans * n2; // Dividend
-      }
+      if(op === '+') { n1 = r(max) + 2; n2 = r(max) + 2; ans = n1 + n2; } 
+      else if (op === '-') { n1 = r(max) + 5; n2 = r(n1-2) + 1; ans = n1 - n2; } 
+      else if (op === '*') { symbol = 'x'; const mMax = currentDiff === 1 ? 5 : (currentDiff === 2 ? 9 : 12); n1 = r(mMax) + 2; n2 = r(mMax) + 2; ans = n1 * n2; } 
+      else { symbol = '÷'; const dMax = currentDiff === 1 ? 5 : 10; ans = r(dMax) + 2; n2 = r(dMax) + 2; n1 = ans * n2; }
       
       state.currentQ = { text: `${n1} ${symbol} ${n2}`, ans: ans };
       renderQuestion();
   };
 
   function generateNextOnlineQ() {
-      // Only Host generates to keep sync
       if(state.role !== 'p1') return;
       
       const op = config.ops[Math.floor(Math.random() * config.ops.length)];
@@ -979,17 +938,13 @@
       else { symbol = '÷'; const d = config.diff===1?5:10; ans=r(d)+2; n2=r(d)+2; n1=ans*n2; }
 
       update(ref(db, 'rooms/' + state.roomCode), {
-          currentQuestion: { text: `${n1} ${symbol} ${n2}`, ans: ans, id: Date.now() },
-          lastAnswerBy: null
+          currentQuestion: { text: `${n1} ${symbol} ${n2}`, ans: ans, id: Date.now() }
       });
   }
 
   function renderQuestion() {
       document.getElementById('q-text').textContent = state.currentQ.text;
-      state.input = '';
-      updateInput();
-      
-      // Reset UI states
+      state.input = ''; updateInput();
       const card = document.getElementById('q-card');
       card.classList.remove('shake', 'pop');
       document.getElementById('numpad').classList.remove('frozen-ui');
@@ -998,7 +953,6 @@
 
   function r(m) { return Math.floor(Math.random() * m); }
 
-  /* --- INPUT --- */
   window.input = (v) => {
       if(state.frozen || state.paused) return;
       if(v === 'del') state.input = state.input.slice(0, -1);
@@ -1018,23 +972,22 @@
       const val = parseInt(state.input);
       
       if(val === state.currentQ.ans) {
-          // CORRECT
           playSound('correct');
           state.score += 10 + (state.streak * 2);
           state.streak++;
-          
           if(config.mode === 'survival') state.time += 3;
           
           showToast("DOĞRU! ✅");
           
-          // Online Sync
           if(state.isOnline) {
               update(ref(db, 'rooms/' + state.roomCode + '/players/' + state.role), { score: state.score });
-              // Trigger new question via "lastAnswerBy" logic or just let Host detect
+              // Trigger explicit event for "I answered correctly"
+              update(ref(db, 'rooms/' + state.roomCode + '/latestEvent'), {
+                  type: 'answer', who: state.role, name: state.identity.name, qId: state.currentQ.id, ts: Date.now()
+              });
+              
               if(state.role === 'p1') generateNextOnlineQ();
-              else update(ref(db, 'rooms/' + state.roomCode), { lastAnswerBy: state.role }); // Signal host
           } else {
-              // Solo Logic
               if(config.mode === 'count') {
                   state.qIndex++;
                   if(state.qIndex >= 20) endGame();
@@ -1043,20 +996,12 @@
                   nextQuestion();
               }
           }
-
       } else {
-          // WRONG
           if(state.shieldActive) {
-              showToast("Kalkan Korudu! 🛡️");
-              state.shieldActive = false;
-              state.input = ''; updateInput();
-              return;
+              showToast("Kalkan Korudu! 🛡️"); state.shieldActive = false; state.input = ''; updateInput(); return;
           }
-
-          playSound('wrong');
-          state.streak = 0;
+          playSound('wrong'); state.streak = 0;
           if(config.mode === 'survival') state.time -= 5;
-          
           handleWrong();
       }
       updateHUD();
@@ -1066,25 +1011,17 @@
       state.frozen = true;
       document.getElementById('q-card').classList.add('shake');
       document.getElementById('numpad').classList.add('frozen-ui');
-      
-      // Show correct answer
       const ca = document.getElementById('correct-ans-display');
       ca.textContent = "Cevap: " + state.currentQ.ans;
       ca.classList.remove('hidden');
-      
       showToast("DONDU! 🧊");
       
-      // Frozen for 2s
       setTimeout(() => {
           if(!state.active) return;
           state.frozen = false;
           document.getElementById('numpad').classList.remove('frozen-ui');
-          if(!state.isOnline) nextQuestion(); // Solo moves on
-          else {
-               // Online: just unfreeze, keep trying same Q or wait for opponent
-               state.input = ''; updateInput();
-               ca.classList.add('hidden');
-          }
+          if(!state.isOnline) nextQuestion(); 
+          else { state.input = ''; updateInput(); ca.classList.add('hidden'); }
       }, 2000);
   }
 
@@ -1093,33 +1030,22 @@
           state.passes--;
           document.getElementById('btn-pas').innerHTML = `PAS<span style="font-size:0.6rem;">(${state.passes})</span>`;
           if(state.isOnline) {
-               // Online penalty? Or just wait? 
-               // For simplicity, just flash "Pass" and wait. 
-               // Real pass in sync requires new Q.
                if(state.role === 'p1') generateNextOnlineQ();
-               else update(ref(db, 'rooms/' + state.roomCode), { lastAnswerBy: state.role });
-          } else {
-               nextQuestion();
-          }
+          } else { nextQuestion(); }
       }
   };
 
   function updateHUD() {
       document.getElementById('my-score').textContent = state.score;
       const s = document.getElementById('streak-indicator');
-      if(state.streak > 1) {
-          s.style.opacity = 1;
-          s.textContent = `x${state.streak} 🔥`;
-      } else {
-          s.style.opacity = 0;
-      }
+      if(state.streak > 1) { s.style.opacity = 1; s.textContent = `x${state.streak} 🔥`; } 
+      else { s.style.opacity = 0; }
   }
 
-  /* --- ONLINE SYNC HANDLER --- */
+  /* --- ONLINE SYNC --- */
   function handleGameSync(data) {
-      // Sync Score
       const oppRole = state.role === 'p1' ? 'p2' : 'p1';
-      const oppData = data.players[oppRole];
+      const oppData = data.players?.[oppRole];
       if(oppData) {
           state.oppScore = oppData.score || 0;
           document.getElementById('enemy-score').textContent = state.oppScore;
@@ -1129,16 +1055,20 @@
       if(data.currentQuestion && data.currentQuestion.id !== state.currentQ.id) {
           state.currentQ = data.currentQuestion;
           renderQuestion();
-          
-          // Did opponent answer?
-          if(data.lastAnswerBy && data.lastAnswerBy !== state.role) {
-              showToast(`${state.oppName} BİLDİ! 🚀`);
-          }
       }
-      
-      // Host generates new Q if guest answered
-      if(state.role === 'p1' && data.lastAnswerBy === 'p2') {
-          generateNextOnlineQ();
+
+      // Sync "Who Answered" Events
+      if(data.latestEvent && data.latestEvent.ts > lastEventTime) {
+          lastEventTime = data.latestEvent.ts;
+          const ev = data.latestEvent;
+          
+          if(ev.type === 'answer' && ev.who !== state.role) {
+              showToast(`${ev.name} BİLDİ! 🚀`);
+          }
+          if(ev.type === 'freeze' && ev.target === state.role) {
+              showToast("RAKİP SENİ DONDURDU! ❄️");
+              handleWrong();
+          }
       }
 
       // Reactions
@@ -1147,81 +1077,53 @@
           showFloatingEmoji(data.reaction.emoji);
       }
       
-      // Powerup Event (Freeze)
-      if(data.event && data.event.ts > lastReactTime && data.event.target === state.role) {
-          lastReactTime = data.event.ts;
-          if(data.event.type === 'freeze') {
-              showToast("RAKİP SENİ DONDURDU! ❄️");
-              handleWrong(); // Re-use freeze logic
-          }
-      }
-      
-      // Check Game End
-      if(data.status === 'finished') {
-          endGameOnline(false);
-      }
+      if(data.status === 'finished') { endGameOnline(false); }
   }
 
-  /* --- POWERUPS & REACTIONS --- */
+  /* --- POWERUPS --- */
   window.usePowerup = (type) => {
       const btn = document.getElementById('pu-' + type);
       if(btn.disabled) return;
-      btn.disabled = true; // One time use
+      btn.disabled = true; 
       
-      if(type === 'shield') {
-          state.shieldActive = true;
-          showToast("Kalkan Aktif! 🛡️");
-      } else if (type === 'time') {
-          state.time += 5;
-          showToast("+5 Saniye! ⏳");
-      } else if (type === 'freeze' && state.isOnline) {
-          // Send Freeze to Opponent
+      if(type === 'shield') { state.shieldActive = true; showToast("Kalkan Aktif! 🛡️"); } 
+      else if (type === 'time') { state.time += 5; showToast("+5 Saniye! ⏳"); } 
+      else if (type === 'freeze' && state.isOnline) {
           const oppRole = state.role === 'p1' ? 'p2' : 'p1';
-          update(ref(db, 'rooms/' + state.roomCode + '/event'), {
+          update(ref(db, 'rooms/' + state.roomCode + '/latestEvent'), {
                type: 'freeze', target: oppRole, ts: Date.now()
           });
       }
   };
 
   window.sendReaction = (emoji) => {
-      // Cooldown 3s
-      const btn = document.querySelector('.react-btn'); // Just grab generic for check
+      const btn = document.querySelector('.react-btn');
       if(Date.now() - (btn.dataset.last || 0) < 3000) return;
-      
       btn.dataset.last = Date.now();
       showFloatingEmoji(emoji);
-      
       if(state.isOnline) {
-          update(ref(db, 'rooms/' + state.roomCode + '/reaction'), {
-              emoji: emoji, from: state.role, ts: Date.now()
-          });
+          update(ref(db, 'rooms/' + state.roomCode + '/reaction'), { emoji: emoji, from: state.role, ts: Date.now() });
       }
   };
 
   function showFloatingEmoji(emoji) {
       const el = document.createElement('div');
-      el.className = 'floating-emoji';
-      el.textContent = emoji;
+      el.className = 'floating-emoji'; el.textContent = emoji;
       document.body.appendChild(el);
       setTimeout(() => el.remove(), 2000);
   }
 
   function showToast(msg) {
       const t = document.createElement('div');
-      t.className = 'toast';
-      t.textContent = msg;
+      t.className = 'toast'; t.textContent = msg;
       document.body.appendChild(t);
       setTimeout(() => t.remove(), 1500);
   }
 
-  /* --- END GAME --- */
   function endGame() {
       stopGame();
-      if(state.isOnline) {
-          update(ref(db, 'rooms/' + state.roomCode), { status: 'finished' });
-      } else {
-          showResultsSolo();
-      }
+      if(state.isOnline) { update(ref(db, 'rooms/' + state.roomCode), { status: 'finished' }); } 
+      else { showResultsSolo(); }
   }
 
   function endGameOnline(abrupt) {
@@ -1239,29 +1141,20 @@
       const btn = document.getElementById('btn-rematch');
       const btnHome = document.getElementById('btn-res-home');
       
+      // Fix: Ensure Home button is always visible and clickable
+      btnHome.classList.remove('hidden');
+      btnHome.style.pointerEvents = "auto";
+      
       if(abrupt) {
           title.textContent = "Rakip Ayrıldı";
           msg.textContent = "Hükmen Galipsin!";
-          btn.classList.add('hidden'); // Hide rematch
-          // Ensure Home button is visible and active
-          btnHome.classList.remove('hidden');
-          btnHome.style.pointerEvents = "auto";
+          btn.classList.add('hidden');
       } else {
           btn.classList.remove('hidden');
-          if(state.score > state.oppScore) {
-              msg.textContent = "KAZANDIN! 🎉";
-              startConfetti();
-              playSound('win');
-          } else if (state.score < state.oppScore) {
-              msg.textContent = "Kaybettin...";
-              msg.style.color = "var(--danger)";
-          } else {
-              msg.textContent = "Berabere!";
-              msg.style.color = "var(--primary)";
-          }
+          if(state.score > state.oppScore) { msg.textContent = "KAZANDIN! 🎉"; startConfetti(); playSound('win'); } 
+          else if (state.score < state.oppScore) { msg.textContent = "Kaybettin..."; msg.style.color = "var(--danger)"; } 
+          else { msg.textContent = "Berabere!"; msg.style.color = "var(--primary)"; }
       }
-      
-      // Rematch Listen
       listenRematch();
   }
 
@@ -1273,13 +1166,10 @@
       document.getElementById('btn-rematch').classList.add('hidden');
       
       if(state.score > stats.best) {
-          stats.best = state.score;
-          document.getElementById('res-msg').textContent = "YENİ REKOR! 🔥";
-          startConfetti();
-          playSound('win');
+          stats.best = state.score; document.getElementById('res-msg').textContent = "YENİ REKOR! 🔥";
+          startConfetti(); playSound('win');
       }
-      stats.games++;
-      stats.correct += Math.floor(state.score / 10); // rough estimate
+      stats.games++; stats.correct += Math.floor(state.score / 10);
       localStorage.setItem('mu_stats', JSON.stringify(stats));
   }
 
@@ -1288,25 +1178,17 @@
       clearInterval(gameTimer);
   }
 
-  /* --- REMATCH LOGIC --- */
   function listenRematch() {
       if(!state.isOnline) return;
-      const rRef = ref(db, 'rooms/' + state.roomCode + '/rematch');
-      onValue(rRef, snap => {
+      onValue(ref(db, 'rooms/' + state.roomCode + '/rematch'), snap => {
           const val = snap.val() || {};
           const s = document.getElementById('rematch-status');
-          
           if(val.p1 && val.p2) {
               s.textContent = "Yeniden Başlıyor...";
               if(state.role === 'p1') {
-                   // Reset scores and start
                    update(ref(db, 'rooms/' + state.roomCode), {
-                       status: 'playing',
-                       rematch: null,
-                       players: {
-                           p1: { score:0, ready:true, name:state.identity.name, avatar:state.identity.avatar },
-                           p2: { score:0, ready:true, name:state.oppName, avatar:state.oppAvatar } // keep names
-                       }
+                       status: 'playing', rematch: null,
+                       players: { p1: { score:0, ready:true, name:state.identity.name, avatar:state.identity.avatar }, p2: { score:0, ready:true, name:state.oppName, avatar:state.oppAvatar } }
                    });
                    generateNextOnlineQ();
               }
@@ -1322,7 +1204,7 @@
       update(ref(db, 'rooms/' + state.roomCode + '/rematch/' + state.role), true);
   };
 
-  /* --- STATS --- */
+  /* --- STATS & CONFETTI --- */
   window.showStats = () => {
       document.getElementById('stat-best').textContent = stats.best;
       document.getElementById('stat-games').textContent = stats.games;
@@ -1335,32 +1217,20 @@
       showStats();
   };
 
-  /* --- CONFETTI --- */
   function startConfetti() {
       const canvas = document.getElementById('confetti');
       const ctx = canvas.getContext('2d');
       canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-      const p = []; 
-      for(let i=0; i<100; i++) p.push({x:Math.random()*canvas.width, y:-10, v:Math.random()*5+2, c:'#'+Math.floor(Math.random()*16777215).toString(16)});
-      
+      const p = []; for(let i=0; i<100; i++) p.push({x:Math.random()*canvas.width, y:-10, v:Math.random()*5+2, c:'#'+Math.floor(Math.random()*16777215).toString(16)});
       function draw() {
           ctx.clearRect(0,0,canvas.width,canvas.height);
-          p.forEach(part => {
-              part.y += part.v;
-              ctx.fillStyle = part.c; ctx.fillRect(part.x, part.y, 8, 8);
-              if(part.y > canvas.height) part.y = -10;
-          });
+          p.forEach(part => { part.y += part.v; ctx.fillStyle = part.c; ctx.fillRect(part.x, part.y, 8, 8); if(part.y > canvas.height) part.y = -10; });
           if(document.getElementById('result-screen').style.opacity === '1') requestAnimationFrame(draw);
       }
       draw();
   }
-
-  // Init
-  init();
   
-  // Helpers
-  // window.toggleSound defined above
-
+  init();
 </script>
 </body>
 </html>
