@@ -61,12 +61,14 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: var(--pad); overflow-y: auto; transition: opacity 0.3s ease;
             backdrop-filter: blur(5px);
-            pointer-events: auto; /* Ensure clickable */
+            pointer-events: auto;
         }
         .hidden { display: none !important; opacity: 0; pointer-events: none; }
         
-        /* Result Screen - Higher Z-Index to ensure buttons work */
-        #result-screen { z-index: 6000; }
+        /* Result Screen - Max Z-Index */
+        #result-screen { z-index: 9000; }
+        #result-screen .card { z-index: 9010; pointer-events: auto; }
+        #confetti { z-index: 9005; pointer-events: none; }
 
         /* Cards */
         .card {
@@ -74,7 +76,6 @@
             box-shadow: var(--shadow); width: 100%; max-width: 550px; text-align: center;
             border: 4px solid var(--white); position: relative;
             max-height: 95vh; overflow-y: auto;
-            /* Ensure card contents are above confetti */
             z-index: 10;
         }
 
@@ -101,8 +102,7 @@
             border: none; border-radius: 20px; font-size: 1.3rem; font-weight: 800;
             margin-top: 20px; cursor: pointer; box-shadow: 0 6px 0 #009476; transition: 0.1s;
             font-family: 'Fredoka', sans-serif;
-            position: relative; /* Ensure z-index works */
-            z-index: 20;
+            position: relative; z-index: 20; pointer-events: auto;
         }
         .big-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #009476; }
         .big-btn.disabled { opacity: 0.6; pointer-events: none; filter: grayscale(1); }
@@ -151,6 +151,12 @@
         .p-name { flex: 1; text-align: left; font-weight: 800; font-size: 1.1rem; }
         .p-status { font-size: 0.8rem; font-weight: 700; color: #b2bec3; }
         .badge-ready { background: var(--success); color: white; padding: 3px 10px; border-radius: 10px; font-size: 0.7rem; }
+        
+        .lobby-settings-box {
+            background: #fff3cd; color: #856404; padding: 10px; border-radius: 15px; 
+            font-size: 0.85rem; margin-bottom: 15px; border: 1px solid #ffeeba;
+            text-align: left;
+        }
 
         /* Game UI */
         #game-header {
@@ -205,11 +211,15 @@
         .num-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--light); }
         .num-btn.del { background: var(--accent); color: white; box-shadow: 0 5px 0 #e17055; font-size: 1.1rem; font-weight: 800; }
         
-        /* Reactions */
-        .reaction-bar { display: flex; gap: 8px; justify-content: center; margin-top: 15px; }
+        /* Reactions - Moved to Top */
+        .reaction-bar { 
+            display: flex; gap: 5px; justify-content: center; margin: 0 0 10px 0; 
+            background: rgba(255,255,255,0.4); padding: 5px; border-radius: 20px;
+        }
         .react-btn {
-            background: rgba(255,255,255,0.8); border: none; border-radius: 50%;
-            width: 45px; height: 45px; font-size: 1.4rem; cursor: pointer; transition: 0.2s;
+            background: rgba(255,255,255,0.9); border: none; border-radius: 50%;
+            width: 35px; height: 35px; font-size: 1.1rem; cursor: pointer; transition: 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         .react-btn:hover { transform: scale(1.1); background: white; }
         .react-btn:disabled { opacity: 0.3; cursor: wait; }
@@ -217,16 +227,16 @@
         /* Effects */
         .floating-emoji {
             position: fixed; font-size: 4rem; pointer-events: none; z-index: 2000;
-            animation: floatUp 2s forwards; left: 50%; top: 70%;
+            animation: floatUp 2s forwards; left: 50%; top: 50%;
         }
-        @keyframes floatUp { 0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); } 20% { opacity: 1; transform: translate(-50%, -50px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -200px) scale(1); } }
+        @keyframes floatUp { 0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); } 20% { opacity: 1; transform: translate(-50%, -100px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -300px) scale(1); } }
 
         .toast {
-            position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px;
-            font-weight: 700; font-size: 1.2rem; z-index: 3000; pointer-events: none;
+            position: fixed; top: 15%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.85); color: white; padding: 12px 25px; border-radius: 25px;
+            font-weight: 700; font-size: 1.2rem; z-index: 9999; pointer-events: none;
             animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            white-space: nowrap;
+            white-space: nowrap; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
         @keyframes popIn { from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
 
@@ -346,11 +356,12 @@
             <button class="opt-btn" onclick="setHostDiff(3, this)">Zor</button>
         </div>
 
-        <span class="section-title">İşlem</span>
+        <span class="section-title">İşlemler (Çoklu Seçim)</span>
         <div class="btn-group">
-            <button class="opt-btn active" onclick="setHostOp('mixed', this)">Karışık</button>
-            <button class="opt-btn" onclick="setHostOp('+', this)">Toplama</button>
-            <button class="opt-btn" onclick="setHostOp('*', this)">Çarpma</button>
+            <button class="opt-btn active host-op-btn" onclick="toggleHostOp('+', this)">Topla</button>
+            <button class="opt-btn active host-op-btn" onclick="toggleHostOp('-', this)">Çıkar</button>
+            <button class="opt-btn host-op-btn" onclick="toggleHostOp('*', this)">Çarp</button>
+            <button class="opt-btn host-op-btn" onclick="toggleHostOp('/', this)">Böl</button>
         </div>
 
         <button class="big-btn btn-blue" onclick="createRoomFinal()">ODAYI OLUŞTUR</button>
@@ -367,7 +378,11 @@
             <div class="copy-icon">📋</div>
             <div id="copy-msg" style="position:absolute; bottom:-20px; font-size:0.7rem; color:var(--success);"></div>
         </div>
-        <p style="font-size:0.8rem; margin-bottom:15px; color:#b2bec3;">Kodu arkadaşınla paylaş!</p>
+        
+        <div id="lobby-settings" class="lobby-settings-box">
+            <!-- Settings will be injected here -->
+            Yükleniyor...
+        </div>
 
         <div class="player-list">
             <div class="player-row" id="p1-row">
@@ -408,11 +423,20 @@
             <span class="pill-val" id="my-score">0</span>
         </div>
     </div>
+    
+    <!-- Reactions moved here (Top) -->
+    <div class="reaction-bar hidden" id="reaction-bar">
+        <button class="react-btn" onclick="sendReaction('👏')">👏</button>
+        <button class="react-btn" onclick="sendReaction('😂')">😂</button>
+        <button class="react-btn" onclick="sendReaction('😭')">😭</button>
+        <button class="react-btn" onclick="sendReaction('😡')">😡</button>
+        <button class="react-btn" onclick="sendReaction('😱')">😱</button>
+    </div>
 
     <!-- Powerups -->
     <div id="powerup-bar" class="powerup-bar hidden">
         <button class="pu-btn" id="pu-shield" onclick="usePowerup('shield')" title="Kalkan (1 Hata Koru)">🛡️<span class="pu-badge">1</span></button>
-        <button class="pu-btn" id="pu-time" onclick="usePowerup('time')" title="+5 Saniye">⏳<span class="pu-badge">1</span></button>
+        <button class="pu-btn" id="pu-x2" onclick="usePowerup('x2')" title="x2 Puan (Sonraki Doğru)">⚡<span class="pu-badge">1</span></button>
         <button class="pu-btn" id="pu-freeze" onclick="usePowerup('freeze')" title="Rakibi Dondur">❄️<span class="pu-badge">1</span></button>
     </div>
 
@@ -420,6 +444,7 @@
     <div id="q-area">
         <div class="q-card" id="q-card">
             <div style="position:absolute; top:10px; right:15px; color:#fab1a0; font-weight:800; opacity:0;" id="streak-indicator">x2 🔥</div>
+             <div style="position:absolute; top:10px; left:15px; color:#fab1a0; font-weight:800; opacity:0;" id="x2-indicator">2 KAT PUAN! ⚡</div>
             <div class="q-text" id="q-text">2 + 2</div>
             <div class="correct-answer-show hidden" id="correct-ans-display">Cevap: 4</div>
             <div class="ans-preview" id="ans-preview"></div>
@@ -441,21 +466,13 @@
         <button class="num-btn" style="grid-column: span 2;" onclick="input(0)">0</button>
     </div>
 
-    <div class="reaction-bar hidden" id="reaction-bar">
-        <button class="react-btn" onclick="sendReaction('👏')">👏</button>
-        <button class="react-btn" onclick="sendReaction('😂')">😂</button>
-        <button class="react-btn" onclick="sendReaction('😭')">😭</button>
-        <button class="react-btn" onclick="sendReaction('😡')">😡</button>
-        <button class="react-btn" onclick="sendReaction('😱')">😱</button>
-    </div>
-
     <button class="big-btn btn-success" style="max-width:400px; margin-top:15px;" onclick="checkAnswer()">CEVAPLA</button>
 </div>
 
 <!-- RESULT SCREEN -->
 <div id="result-screen" class="screen hidden">
     <canvas id="confetti" style="position:absolute; inset:0; pointer-events:none;"></canvas>
-    <div class="card" style="z-index:10;">
+    <div class="card">
         <h1 id="res-title">Oyun Bitti!</h1>
         <div style="font-size:4rem; margin:10px 0;" id="res-emoji">🏆</div>
         
@@ -519,7 +536,7 @@
 
   /* --- GLOBAL STATE --- */
   let config = { diff: 1, ops: ['+', '-'], mode: 'count', device: 'tablet' }; // count, survival, online
-  let hostConfig = { time: 60, diff: 1, op: 'mixed' };
+  let hostConfig = { time: 60, diff: 1, ops: ['+', '-'] }; // Host default
   
   let state = {
       active: false, paused: false, frozen: false,
@@ -527,6 +544,7 @@
       qIndex: 0, currentQ: {}, input: '', 
       streak: 0,
       shieldActive: false,
+      doublePoints: false, // New Joker
       
       // Online
       isOnline: false, roomCode: null, role: null, // p1 (host), p2 (guest)
@@ -540,7 +558,7 @@
   let lobbyTimeout, gameTimer;
   let lastReactTime = 0;
   let lastEventTime = 0;
-  let activeRoomListener = null; // Listener reference cleanup
+  let activeRoomListener = null; 
   
   let stats = JSON.parse(localStorage.getItem('mu_stats')) || { best: 0, games: 0, correct: 0 };
   let soundEnabled = true;
@@ -557,7 +575,6 @@
           showScreen('identity-screen');
       }
       
-      // Pre-select avatar
       document.querySelectorAll('.avatar-opt').forEach(el => {
           if(el.textContent === state.identity.avatar) el.classList.add('selected');
           else el.classList.remove('selected');
@@ -574,53 +591,34 @@
       const gain = audioCtx.createGain();
       osc.connect(gain);
       gain.connect(audioCtx.destination);
-      
       const now = audioCtx.currentTime;
       
       if (type === 'click') {
-          osc.type = 'triangle'; 
-          osc.frequency.setValueAtTime(600, now);
-          osc.frequency.exponentialRampToValueAtTime(300, now + 0.05);
-          gain.gain.setValueAtTime(0.1, now); 
-          gain.gain.linearRampToValueAtTime(0, now + 0.05);
+          osc.type = 'triangle'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(300, now + 0.05);
+          gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.05);
           osc.start(now); osc.stop(now + 0.05);
       } else if (type === 'correct') {
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(500, now);
-          osc.frequency.exponentialRampToValueAtTime(1000, now + 0.2);
-          gain.gain.setValueAtTime(0.2, now); 
-          gain.gain.linearRampToValueAtTime(0, now + 0.3);
+          osc.type = 'sine'; osc.frequency.setValueAtTime(500, now); osc.frequency.exponentialRampToValueAtTime(1000, now + 0.2);
+          gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.3);
           osc.start(now); osc.stop(now + 0.3);
       } else if (type === 'wrong') {
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(200, now);
-          osc.frequency.linearRampToValueAtTime(100, now + 0.3);
-          gain.gain.setValueAtTime(0.2, now); 
-          gain.gain.linearRampToValueAtTime(0, now + 0.3);
+          osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, now); osc.frequency.linearRampToValueAtTime(100, now + 0.3);
+          gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.3);
           osc.start(now); osc.stop(now + 0.3);
       } else if (type === 'win') {
-          osc.type = 'square';
-          osc.frequency.setValueAtTime(400, now);
-          osc.frequency.setValueAtTime(600, now + 0.1);
-          osc.frequency.setValueAtTime(800, now + 0.2);
-          gain.gain.setValueAtTime(0.1, now);
-          gain.gain.linearRampToValueAtTime(0, now + 0.5);
+          osc.type = 'square'; osc.frequency.setValueAtTime(400, now); osc.frequency.setValueAtTime(600, now + 0.1);
+          gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.5);
           osc.start(now); osc.stop(now + 0.5);
       }
   }
-
-  window.toggleSound = () => {
-      soundEnabled = !soundEnabled;
-      document.getElementById('sound-icon').textContent = soundEnabled ? '🔊' : '🔇';
-  };
+  window.toggleSound = () => { soundEnabled = !soundEnabled; document.getElementById('sound-icon').textContent = soundEnabled ? '🔊' : '🔇'; };
 
   /* --- NAVIGATION --- */
   window.showScreen = (id) => {
       document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
       const el = document.getElementById(id);
       el.classList.remove('hidden');
-      el.style.opacity = 0;
-      setTimeout(() => el.style.opacity = 1, 50);
+      el.style.opacity = 0; setTimeout(() => el.style.opacity = 1, 50);
       playSound('click');
   };
   
@@ -644,77 +642,64 @@
   window.selectAvatar = (av, btn) => {
       state.identity.avatar = av;
       document.querySelectorAll('.avatar-opt').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      playSound('click');
+      btn.classList.add('selected'); playSound('click');
   };
 
-  window.setDevice = (dev, btn) => {
-      document.body.className = `mode-${dev}`;
-      updateBtnGroup(btn);
-  };
-
+  window.setDevice = (dev, btn) => { document.body.className = `mode-${dev}`; updateBtnGroup(btn); };
   window.setMode = (m, btn) => {
-      config.mode = m;
-      updateBtnGroup(btn);
+      config.mode = m; updateBtnGroup(btn);
       const desc = document.getElementById('mode-desc');
       const soloOpts = document.getElementById('solo-options');
       const onlineOpts = document.getElementById('online-options');
-      
-      if(m === 'count') {
-          desc.textContent = "Stres yok! 20 soruyu kendi hızında çöz.";
-          soloOpts.classList.remove('hidden'); onlineOpts.classList.add('hidden');
-      } else if (m === 'survival') {
-          desc.textContent = "Doğru cevap süre kazandırır, yanlış kaybettirir. Zorluk artar!";
-          soloOpts.classList.remove('hidden'); onlineOpts.classList.add('hidden');
-      } else {
-          desc.textContent = "Arkadaşınla eş zamanlı yarış. En yüksek puanı toplayan kazanır!";
-          soloOpts.classList.add('hidden'); onlineOpts.classList.remove('hidden');
-      }
+      if(m === 'count') { desc.textContent = "Stres yok! 20 soruyu kendi hızında çöz."; soloOpts.classList.remove('hidden'); onlineOpts.classList.add('hidden'); } 
+      else if (m === 'survival') { desc.textContent = "Doğru cevap süre kazandırır, yanlış kaybettirir."; soloOpts.classList.remove('hidden'); onlineOpts.classList.add('hidden'); } 
+      else { desc.textContent = "Arkadaşınla eş zamanlı yarış. En yüksek puanı toplayan kazanır!"; soloOpts.classList.add('hidden'); onlineOpts.classList.remove('hidden'); }
       playSound('click');
   };
 
   window.setDiff = (d, btn) => { config.diff = d; updateBtnGroup(btn); playSound('click'); };
   window.toggleOp = (op, btn) => {
-      if(config.ops.includes(op) && config.ops.length > 1) {
-          config.ops = config.ops.filter(o => o !== op);
-          btn.classList.remove('active');
-      } else if (!config.ops.includes(op)) {
-          config.ops.push(op);
-          btn.classList.add('active');
-      }
+      if(config.ops.includes(op) && config.ops.length > 1) { config.ops = config.ops.filter(o => o !== op); btn.classList.remove('active'); } 
+      else if (!config.ops.includes(op)) { config.ops.push(op); btn.classList.add('active'); }
       playSound('click');
   };
 
   function updateBtnGroup(btn) {
       Array.from(btn.parentElement.children).forEach(c => {
-          if(!c.classList.contains('op-btn')) c.classList.remove('active');
+          if(!c.classList.contains('op-btn') && !c.classList.contains('host-op-btn')) c.classList.remove('active');
       });
       btn.classList.add('active');
   }
 
-  /* --- ONLINE SETUP HOST --- */
+  /* --- ONLINE HOST SETUP --- */
   window.setupOnlineRoom = () => { showScreen('online-setup-screen'); };
   window.setHostTime = (t, btn) => { hostConfig.time = t; updateBtnGroup(btn); playSound('click'); };
   window.setHostDiff = (d, btn) => { hostConfig.diff = d; updateBtnGroup(btn); playSound('click'); };
-  window.setHostOp = (o, btn) => { hostConfig.op = o; updateBtnGroup(btn); playSound('click'); };
+  
+  // New: Host Multi-Op Selection
+  window.toggleHostOp = (op, btn) => {
+       if(hostConfig.ops.includes(op) && hostConfig.ops.length > 1) {
+           hostConfig.ops = hostConfig.ops.filter(o => o !== op);
+           btn.classList.remove('active');
+       } else if (!hostConfig.ops.includes(op)) {
+           hostConfig.ops.push(op);
+           btn.classList.add('active');
+       }
+       playSound('click');
+  };
 
   window.createRoomFinal = () => {
       const code = Math.floor(10000 + Math.random() * 90000);
-      state.roomCode = code; state.role = 'p1'; state.isOnline = true;
-      state.isReady = false;
+      state.roomCode = code; state.role = 'p1'; state.isOnline = true; state.isReady = false;
       
-      const ops = hostConfig.op === 'mixed' ? ['+','-','*','/'] : [hostConfig.op];
-      config.diff = hostConfig.diff; config.ops = ops;
+      config.diff = hostConfig.diff; config.ops = hostConfig.ops;
 
       set(ref(db, 'rooms/' + code), {
           status: 'waiting',
-          config: { time: hostConfig.time, diff: hostConfig.diff, ops: ops },
-          players: {
-              p1: { name: state.identity.name, avatar: state.identity.avatar, ready: false, score: 0 }
-          },
+          config: { time: hostConfig.time, diff: hostConfig.diff, ops: hostConfig.ops },
+          players: { p1: { name: state.identity.name, avatar: state.identity.avatar, ready: false, score: 0 } },
           ts: Date.now()
       });
-      
       onDisconnect(ref(db, 'rooms/' + code)).remove();
       enterLobby(code);
   };
@@ -728,13 +713,10 @@
           if(snap.exists()) {
               const data = snap.val();
               if(data.status === 'waiting' && !data.players.p2) {
-                  state.roomCode = code; state.role = 'p2'; state.isOnline = true;
-                  state.isReady = false;
+                  state.roomCode = code; state.role = 'p2'; state.isOnline = true; state.isReady = false;
                   config.diff = data.config.diff; config.ops = data.config.ops;
                   
-                  update(ref(db, 'rooms/' + code + '/players/p2'), {
-                      name: state.identity.name, avatar: state.identity.avatar, ready: false, score: 0
-                  });
+                  update(ref(db, 'rooms/' + code + '/players/p2'), { name: state.identity.name, avatar: state.identity.avatar, ready: false, score: 0 });
                   onDisconnect(ref(db, 'rooms/' + code + '/players/p2')).remove();
                   enterLobby(code);
               } else { showToast("Oda dolu veya oyun başlamış!"); }
@@ -748,9 +730,7 @@
       document.getElementById('lobby-code').textContent = code;
       
       clearTimeout(lobbyTimeout);
-      lobbyTimeout = setTimeout(() => {
-          if(!state.active) { alert("Süre doldu! Oda kapatılıyor."); leaveLobby(); }
-      }, 180000);
+      lobbyTimeout = setTimeout(() => { if(!state.active) { alert("Süre doldu! Oda kapatılıyor."); leaveLobby(); } }, 180000);
 
       const roomRef = ref(db, 'rooms/' + code);
       activeRoomListener = onValue(roomRef, snap => {
@@ -762,35 +742,39 @@
           }
           
           updateLobbyUI(data.players);
+          // NEW: Update Lobby Settings Display
+          updateLobbySettings(data.config);
 
-          // Host Logic to Start Game
           if(state.role === 'p1' && data.status === 'waiting' && data.players?.p1?.ready && data.players?.p2?.ready) {
               update(ref(db, 'rooms/' + code), { status: 'playing' });
               generateNextOnlineQ();
           }
           
-          if(data.status === 'playing' && !state.active) {
-              startOnlineGame(data.config.time);
-          }
-          
-          if(state.active) {
-              handleGameSync(data);
-          }
+          if(data.status === 'playing' && !state.active) { startOnlineGame(data.config.time); }
+          if(state.active) { handleGameSync(data); }
       });
+  }
+
+  function updateLobbySettings(cfg) {
+      if(!cfg) return;
+      const opsNames = cfg.ops.map(o => o==='+'?'Toplama':(o==='-'?'Çıkarma':(o==='*'?'Çarpma':'Bölme'))).join(', ');
+      const diffName = cfg.diff===1?'Kolay':(cfg.diff===2?'Orta':'Zor');
+      document.getElementById('lobby-settings').innerHTML = `
+          <strong>Oyun Ayarları:</strong><br>
+          Süre: ${cfg.time}sn | Zorluk: ${diffName}<br>
+          İşlemler: ${opsNames}
+      `;
   }
 
   function updateLobbyUI(players) {
       if(!players) return;
-      const p1 = players.p1;
-      const p2 = players.p2;
-
+      const p1 = players.p1; const p2 = players.p2;
       if(p1) {
           document.getElementById('p1-n').textContent = p1.name;
           document.getElementById('p1-av').textContent = p1.avatar;
           document.getElementById('p1-row').classList.toggle('ready', p1.ready);
           document.getElementById('p1-s').innerHTML = p1.ready ? '<span class="badge-ready">HAZIR</span>' : 'Bekliyor...';
       }
-      
       if(p2) {
           document.getElementById('p2-n').textContent = p2.name;
           document.getElementById('p2-av').textContent = p2.avatar;
@@ -808,23 +792,19 @@
       const btn = document.getElementById('lobby-ready-btn');
       btn.textContent = state.isReady ? "HAZIR (İptal)" : "HAZIRIM";
       btn.style.background = state.isReady ? "#b2bec3" : "var(--success)";
-      
       update(ref(db, 'rooms/' + state.roomCode + '/players/' + state.role), { ready: state.isReady });
       playSound('click');
   };
 
   window.leaveLobby = () => {
       try {
-          if (activeRoomListener && state.roomCode) {
-             off(ref(db, 'rooms/' + state.roomCode), 'value', activeRoomListener);
-          }
+          if (activeRoomListener && state.roomCode) { off(ref(db, 'rooms/' + state.roomCode), 'value', activeRoomListener); }
           if(state.roomCode) {
               if(state.role === 'p1') remove(ref(db, 'rooms/' + state.roomCode));
               else update(ref(db, 'rooms/' + state.roomCode + '/players/p2'), null);
           }
       } catch(e) { console.log("Lobby exit error", e); }
-      state.isOnline = false;
-      state.active = false;
+      state.isOnline = false; state.active = false;
       goHome();
   };
   
@@ -836,33 +816,26 @@
   };
 
   /* --- GAME LOGIC --- */
-  
   window.startSoloGame = () => {
-      state.active = true;
-      state.isOnline = false;
+      state.active = true; state.isOnline = false;
       state.score = 0; state.streak = 0; state.qIndex = 0;
-      state.frozen = false; state.shieldActive = false;
+      state.frozen = false; state.shieldActive = false; state.doublePoints = false;
       
-      if(config.mode === 'count') state.time = 0;
-      else state.time = 60;
+      if(config.mode === 'count') state.time = 0; else state.time = 60;
       
       document.getElementById('enemy-pill').style.opacity = 0;
       document.getElementById('powerup-bar').classList.add('hidden');
       document.getElementById('reaction-bar').classList.add('hidden');
       document.getElementById('game-mode-label').textContent = config.mode === 'count' ? '20 SORU' : 'ZAMANA KARŞI';
       
-      startCountdown(() => {
-          showScreen('game-screen');
-          nextQuestion();
-          gameTimer = setInterval(gameLoop, 1000);
-      });
+      startCountdown(() => { showScreen('game-screen'); nextQuestion(); gameTimer = setInterval(gameLoop, 1000); });
   };
 
   function startOnlineGame(duration) {
-      if(state.active) return; // Prevent double start
+      if(state.active) return;
       state.active = true;
       state.score = 0; state.streak = 0; state.frozen = false;
-      state.time = duration; state.shieldActive = false;
+      state.time = duration; state.shieldActive = false; state.doublePoints = false;
       
       document.getElementById('powerup-bar').classList.remove('hidden');
       document.getElementById('reaction-bar').classList.remove('hidden');
@@ -877,44 +850,26 @@
               document.getElementById('enemy-name').textContent = state.oppName;
           }
       });
-
-      startCountdown(() => {
-          showScreen('game-screen');
-          gameTimer = setInterval(gameLoop, 1000);
-      });
+      startCountdown(() => { showScreen('game-screen'); gameTimer = setInterval(gameLoop, 1000); });
   }
 
   function startCountdown(cb) {
-      const el = document.getElementById('countdown-overlay');
-      el.classList.remove('hidden');
+      const el = document.getElementById('countdown-overlay'); el.classList.remove('hidden');
       let c = 3; el.textContent = c; playSound('click');
-      
-      const int = setInterval(() => {
-          c--;
-          if(c > 0) { el.textContent = c; playSound('click'); } 
-          else { clearInterval(int); el.classList.add('hidden'); cb(); }
-      }, 1000);
+      const int = setInterval(() => { c--; if(c > 0) { el.textContent = c; playSound('click'); } else { clearInterval(int); el.classList.add('hidden'); cb(); } }, 1000);
   }
 
   function gameLoop() {
       if(state.paused) return;
-      if(config.mode === 'count') {
-          state.time++;
-          document.getElementById('timer-display').textContent = state.time;
-      } else {
-          state.time--;
-          document.getElementById('timer-display').textContent = state.time;
-          if(state.time <= 0) endGame();
-      }
+      if(config.mode === 'count') { state.time++; document.getElementById('timer-display').textContent = state.time; } 
+      else { state.time--; document.getElementById('timer-display').textContent = state.time; if(state.time <= 0) endGame(); }
   }
 
   window.nextQuestion = () => {
       let currentDiff = config.diff;
       if(config.mode === 'survival') {
-          if(state.score > 500) currentDiff = 3;
-          else if(state.score > 200) currentDiff = 2;
+          if(state.score > 500) currentDiff = 3; else if(state.score > 200) currentDiff = 2;
       }
-
       const op = config.ops[Math.floor(Math.random() * config.ops.length)];
       let n1, n2, ans, symbol = op;
       const max = currentDiff * 15; 
@@ -930,7 +885,6 @@
 
   function generateNextOnlineQ() {
       if(state.role !== 'p1') return;
-      
       const op = config.ops[Math.floor(Math.random() * config.ops.length)];
       let n1, n2, ans, symbol = op;
       const max = config.diff * 15;
@@ -940,16 +894,13 @@
       else if (op === '*') { symbol = 'x'; const m = config.diff===1?5:9; n1=r(m)+2; n2=r(m)+2; ans=n1*n2; } 
       else { symbol = '÷'; const d = config.diff===1?5:10; ans=r(d)+2; n2=r(d)+2; n1=ans*n2; }
 
-      update(ref(db, 'rooms/' + state.roomCode), {
-          currentQuestion: { text: `${n1} ${symbol} ${n2}`, ans: ans, id: Date.now() }
-      });
+      update(ref(db, 'rooms/' + state.roomCode), { currentQuestion: { text: `${n1} ${symbol} ${n2}`, ans: ans, id: Date.now() } });
   }
 
   function renderQuestion() {
       document.getElementById('q-text').textContent = state.currentQ.text;
       state.input = ''; updateInput();
-      const card = document.getElementById('q-card');
-      card.classList.remove('shake', 'pop');
+      const card = document.getElementById('q-card'); card.classList.remove('shake', 'pop');
       document.getElementById('numpad').classList.remove('frozen-ui');
       document.getElementById('correct-ans-display').classList.add('hidden');
   }
@@ -976,7 +927,15 @@
       
       if(val === state.currentQ.ans) {
           playSound('correct');
-          state.score += 10 + (state.streak * 2);
+          
+          let points = 10 + (state.streak * 2);
+          if(state.doublePoints) {
+              points *= 2;
+              state.doublePoints = false;
+              showToast("2 KAT PUAN! ⚡");
+              document.getElementById('x2-indicator').style.opacity = 0;
+          }
+          state.score += points;
           state.streak++;
           if(config.mode === 'survival') state.time += 3;
           
@@ -984,25 +943,14 @@
           
           if(state.isOnline) {
               update(ref(db, 'rooms/' + state.roomCode + '/players/' + state.role), { score: state.score });
-              // Trigger explicit event for "I answered correctly"
-              update(ref(db, 'rooms/' + state.roomCode + '/latestEvent'), {
-                  type: 'answer', who: state.role, name: state.identity.name, qId: state.currentQ.id, ts: Date.now()
-              });
-              
+              update(ref(db, 'rooms/' + state.roomCode + '/latestEvent'), { type: 'answer', who: state.role, name: state.identity.name, qId: state.currentQ.id, ts: Date.now() });
               if(state.role === 'p1') generateNextOnlineQ();
           } else {
-              if(config.mode === 'count') {
-                  state.qIndex++;
-                  if(state.qIndex >= 20) endGame();
-                  else nextQuestion();
-              } else {
-                  nextQuestion();
-              }
+              if(config.mode === 'count') { state.qIndex++; if(state.qIndex >= 20) endGame(); else nextQuestion(); } 
+              else { nextQuestion(); }
           }
       } else {
-          if(state.shieldActive) {
-              showToast("Kalkan Korudu! 🛡️"); state.shieldActive = false; state.input = ''; updateInput(); return;
-          }
+          if(state.shieldActive) { showToast("Kalkan Korudu! 🛡️"); state.shieldActive = false; state.input = ''; updateInput(); return; }
           playSound('wrong'); state.streak = 0;
           if(config.mode === 'survival') state.time -= 5;
           handleWrong();
@@ -1014,11 +962,8 @@
       state.frozen = true;
       document.getElementById('q-card').classList.add('shake');
       document.getElementById('numpad').classList.add('frozen-ui');
-      const ca = document.getElementById('correct-ans-display');
-      ca.textContent = "Cevap: " + state.currentQ.ans;
-      ca.classList.remove('hidden');
+      const ca = document.getElementById('correct-ans-display'); ca.textContent = "Cevap: " + state.currentQ.ans; ca.classList.remove('hidden');
       showToast("DONDU! 🧊");
-      
       setTimeout(() => {
           if(!state.active) return;
           state.frozen = false;
@@ -1031,51 +976,30 @@
   function updateHUD() {
       document.getElementById('my-score').textContent = state.score;
       const s = document.getElementById('streak-indicator');
-      if(state.streak > 1) { s.style.opacity = 1; s.textContent = `x${state.streak} 🔥`; } 
-      else { s.style.opacity = 0; }
+      if(state.streak > 1) { s.style.opacity = 1; s.textContent = `x${state.streak} 🔥`; } else { s.style.opacity = 0; }
   }
 
   /* --- ONLINE SYNC --- */
   function handleGameSync(data) {
       const oppRole = state.role === 'p1' ? 'p2' : 'p1';
       const oppData = data.players?.[oppRole];
-      if(oppData) {
-          state.oppScore = oppData.score || 0;
-          document.getElementById('enemy-score').textContent = state.oppScore;
-      }
+      if(oppData) { state.oppScore = oppData.score || 0; document.getElementById('enemy-score').textContent = state.oppScore; }
 
-      // Sync Question
-      if(data.currentQuestion && data.currentQuestion.id !== state.currentQ.id) {
-          state.currentQ = data.currentQuestion;
-          renderQuestion();
-      }
+      if(data.currentQuestion && data.currentQuestion.id !== state.currentQ.id) { state.currentQ = data.currentQuestion; renderQuestion(); }
 
-      // Sync "Who Answered" Events
       if(data.latestEvent && data.latestEvent.ts > lastEventTime) {
           lastEventTime = data.latestEvent.ts;
           const ev = data.latestEvent;
-          
           if(ev.type === 'answer') {
-              if(ev.who !== state.role) {
-                  showToast(`${ev.name} BİLDİ! 🚀`);
-              }
-              // CRITICAL FIX: Host generates next question if guest answered
-              if(state.role === 'p1' && ev.who !== 'p1') {
-                   setTimeout(() => generateNextOnlineQ(), 800); // 0.8s delay
-              }
+              if(ev.who !== state.role) { showToast(`${ev.name} BİLDİ! 🚀`); }
+              if(state.role === 'p1' && ev.who !== 'p1') { setTimeout(() => generateNextOnlineQ(), 800); }
           }
-          if(ev.type === 'freeze' && ev.target === state.role) {
-              showToast("RAKİP SENİ DONDURDU! ❄️");
-              handleWrong();
-          }
+          if(ev.type === 'freeze' && ev.target === state.role) { showToast("RAKİP SENİ DONDURDU! ❄️"); handleWrong(); }
       }
 
-      // Reactions
       if(data.reaction && data.reaction.ts > lastReactTime && data.reaction.from !== state.role) {
-          lastReactTime = data.reaction.ts;
-          showFloatingEmoji(data.reaction.emoji);
+          lastReactTime = data.reaction.ts; showFloatingEmoji(data.reaction.emoji);
       }
-      
       if(data.status === 'finished') { endGameOnline(false); }
   }
 
@@ -1086,12 +1010,14 @@
       btn.disabled = true; 
       
       if(type === 'shield') { state.shieldActive = true; showToast("Kalkan Aktif! 🛡️"); } 
-      else if (type === 'time') { state.time += 5; showToast("+5 Saniye! ⏳"); } 
+      else if (type === 'x2') { 
+          state.doublePoints = true; 
+          showToast("x2 Puan Hazır! ⚡"); 
+          document.getElementById('x2-indicator').style.opacity = 1;
+      } 
       else if (type === 'freeze' && state.isOnline) {
           const oppRole = state.role === 'p1' ? 'p2' : 'p1';
-          update(ref(db, 'rooms/' + state.roomCode + '/latestEvent'), {
-               type: 'freeze', target: oppRole, ts: Date.now()
-          });
+          update(ref(db, 'rooms/' + state.roomCode + '/latestEvent'), { type: 'freeze', target: oppRole, ts: Date.now() });
       }
   };
 
@@ -1100,29 +1026,22 @@
       if(Date.now() - (btn.dataset.last || 0) < 3000) return;
       btn.dataset.last = Date.now();
       showFloatingEmoji(emoji);
-      if(state.isOnline) {
-          update(ref(db, 'rooms/' + state.roomCode + '/reaction'), { emoji: emoji, from: state.role, ts: Date.now() });
-      }
+      if(state.isOnline) { update(ref(db, 'rooms/' + state.roomCode + '/reaction'), { emoji: emoji, from: state.role, ts: Date.now() }); }
   };
 
   function showFloatingEmoji(emoji) {
-      const el = document.createElement('div');
-      el.className = 'floating-emoji'; el.textContent = emoji;
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 2000);
+      const el = document.createElement('div'); el.className = 'floating-emoji'; el.textContent = emoji;
+      document.body.appendChild(el); setTimeout(() => el.remove(), 2000);
   }
 
   function showToast(msg) {
-      const t = document.createElement('div');
-      t.className = 'toast'; t.textContent = msg;
-      document.body.appendChild(t);
-      setTimeout(() => t.remove(), 1500);
+      const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+      document.body.appendChild(t); setTimeout(() => t.remove(), 1500);
   }
 
   function endGame() {
       stopGame();
-      if(state.isOnline) { update(ref(db, 'rooms/' + state.roomCode), { status: 'finished' }); } 
-      else { showResultsSolo(); }
+      if(state.isOnline) { update(ref(db, 'rooms/' + state.roomCode), { status: 'finished' }); } else { showResultsSolo(); }
   }
 
   function endGameOnline(abrupt) {
@@ -1140,14 +1059,10 @@
       const btn = document.getElementById('btn-rematch');
       const btnHome = document.getElementById('btn-res-home');
       
-      // Fix: Ensure Home button is always visible and clickable
-      btnHome.classList.remove('hidden');
-      btnHome.style.pointerEvents = "auto";
+      btnHome.classList.remove('hidden'); btnHome.style.pointerEvents = "auto";
       
       if(abrupt) {
-          title.textContent = "Rakip Ayrıldı";
-          msg.textContent = "Hükmen Galipsin!";
-          btn.classList.add('hidden');
+          title.textContent = "Rakip Ayrıldı"; msg.textContent = "Hükmen Galipsin!"; btn.classList.add('hidden');
       } else {
           btn.classList.remove('hidden');
           if(state.score > state.oppScore) { msg.textContent = "KAZANDIN! 🎉"; startConfetti(); playSound('win'); } 
@@ -1164,18 +1079,12 @@
       document.getElementById('res-score').textContent = state.score;
       document.getElementById('btn-rematch').classList.add('hidden');
       
-      if(state.score > stats.best) {
-          stats.best = state.score; document.getElementById('res-msg').textContent = "YENİ REKOR! 🔥";
-          startConfetti(); playSound('win');
-      }
+      if(state.score > stats.best) { stats.best = state.score; document.getElementById('res-msg').textContent = "YENİ REKOR! 🔥"; startConfetti(); playSound('win'); }
       stats.games++; stats.correct += Math.floor(state.score / 10);
       localStorage.setItem('mu_stats', JSON.stringify(stats));
   }
 
-  function stopGame() {
-      state.active = false;
-      clearInterval(gameTimer);
-  }
+  function stopGame() { state.active = false; clearInterval(gameTimer); }
 
   function listenRematch() {
       if(!state.isOnline) return;
@@ -1191,9 +1100,7 @@
                    });
                    generateNextOnlineQ();
               }
-          } else if (val[state.role === 'p1' ? 'p2' : 'p1']) {
-              s.textContent = `${state.oppName} tekrar istiyor!`;
-          }
+          } else if (val[state.role === 'p1' ? 'p2' : 'p1']) { s.textContent = `${state.oppName} tekrar istiyor!`; }
       });
   }
 
@@ -1210,15 +1117,10 @@
       document.getElementById('stat-correct').textContent = stats.correct;
       showScreen('stats-screen');
   };
-  window.clearStats = () => {
-      stats = { best:0, games:0, correct:0 };
-      localStorage.setItem('mu_stats', JSON.stringify(stats));
-      showStats();
-  };
+  window.clearStats = () => { stats = { best:0, games:0, correct:0 }; localStorage.setItem('mu_stats', JSON.stringify(stats)); showStats(); };
 
   function startConfetti() {
-      const canvas = document.getElementById('confetti');
-      const ctx = canvas.getContext('2d');
+      const canvas = document.getElementById('confetti'); const ctx = canvas.getContext('2d');
       canvas.width = window.innerWidth; canvas.height = window.innerHeight;
       const p = []; for(let i=0; i<100; i++) p.push({x:Math.random()*canvas.width, y:-10, v:Math.random()*5+2, c:'#'+Math.floor(Math.random()*16777215).toString(16)});
       function draw() {
