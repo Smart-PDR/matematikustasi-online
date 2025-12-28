@@ -526,6 +526,7 @@
   let lastReactTime = 0;
   
   let stats = JSON.parse(localStorage.getItem('mu_stats')) || { best: 0, games: 0, correct: 0 };
+  let soundEnabled = true;
 
   /* --- INITIALIZATION --- */
   function init() {
@@ -545,6 +546,56 @@
           else el.classList.remove('selected');
       });
   }
+
+  /* --- AUDIO --- */
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  function playSound(type) {
+      if (!soundEnabled) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      const now = audioCtx.currentTime;
+      
+      if (type === 'click') {
+          osc.type = 'triangle'; 
+          osc.frequency.setValueAtTime(600, now);
+          osc.frequency.exponentialRampToValueAtTime(300, now + 0.05);
+          gain.gain.setValueAtTime(0.1, now); 
+          gain.gain.linearRampToValueAtTime(0, now + 0.05);
+          osc.start(now); osc.stop(now + 0.05);
+      } else if (type === 'correct') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(500, now);
+          osc.frequency.exponentialRampToValueAtTime(1000, now + 0.2);
+          gain.gain.setValueAtTime(0.2, now); 
+          gain.gain.linearRampToValueAtTime(0, now + 0.3);
+          osc.start(now); osc.stop(now + 0.3);
+      } else if (type === 'wrong') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(200, now);
+          osc.frequency.linearRampToValueAtTime(100, now + 0.3);
+          gain.gain.setValueAtTime(0.2, now); 
+          gain.gain.linearRampToValueAtTime(0, now + 0.3);
+          osc.start(now); osc.stop(now + 0.3);
+      } else if (type === 'win') {
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(400, now);
+          osc.frequency.setValueAtTime(600, now + 0.1);
+          osc.frequency.setValueAtTime(800, now + 0.2);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.linearRampToValueAtTime(0, now + 0.5);
+          osc.start(now); osc.stop(now + 0.5);
+      }
+  }
+
+  window.toggleSound = () => {
+      soundEnabled = !soundEnabled;
+      document.getElementById('sound-icon').textContent = soundEnabled ? '🔊' : '🔇';
+  };
 
   /* --- NAVIGATION --- */
   window.showScreen = (id) => {
@@ -634,6 +685,10 @@
       state.isReady = false;
       
       const ops = hostConfig.op === 'mixed' ? ['+','-','*','/'] : [hostConfig.op];
+      
+      // Important: Host adopts their own config for the game immediately
+      config.diff = hostConfig.diff;
+      config.ops = ops;
 
       set(ref(db, 'rooms/' + code), {
           status: 'waiting',
@@ -700,8 +755,19 @@
           }
           
           updateLobbyUI(data.players);
+
+          // HOST LOGIC: Check if everyone is ready and start game
+          // Only if status is still 'waiting' to prevent loops
+          if(state.role === 'p1' && data.status === 'waiting' && data.players && data.players.p1 && data.players.p2) {
+              if(data.players.p1.ready && data.players.p2.ready) {
+                  // Both ready -> Start Countdown on DB
+                  update(ref(db, 'rooms/' + code), { status: 'playing' });
+                  // Generate first question
+                  generateNextOnlineQ();
+              }
+          }
           
-          // Game Start Sync
+          // Game Start Sync (Both Players)
           if(data.status === 'playing' && !state.active) {
               startOnlineGame(data.config.time);
           }
@@ -732,16 +798,6 @@
           document.getElementById('p2-av').textContent = p2.avatar;
           document.getElementById('p2-row').classList.toggle('ready', p2.ready);
           document.getElementById('p2-s').innerHTML = p2.ready ? '<span class="badge-ready">HAZIR</span>' : 'Bekliyor...';
-          
-          if(state.role === 'p1') {
-              // Host logic: check start
-              if(p1.ready && p2.ready) {
-                  // Both ready -> Start Countdown on DB
-                  update(ref(db, 'rooms/' + state.roomCode), { status: 'playing' });
-                  // Generate first question
-                  generateNextOnlineQ();
-              }
-          }
       } else {
           document.getElementById('p2-n').textContent = "Rakip Bekleniyor...";
           document.getElementById('p2-s').textContent = "---";
@@ -1182,6 +1238,7 @@
           if(state.score > state.oppScore) {
               msg.textContent = "KAZANDIN! 🎉";
               startConfetti();
+              playSound('win');
           } else if (state.score < state.oppScore) {
               msg.textContent = "Kaybettin...";
               msg.style.color = "var(--danger)";
@@ -1206,6 +1263,7 @@
           stats.best = state.score;
           document.getElementById('res-msg').textContent = "YENİ REKOR! 🔥";
           startConfetti();
+          playSound('win');
       }
       stats.games++;
       stats.correct += Math.floor(state.score / 10); // rough estimate
@@ -1288,8 +1346,7 @@
   init();
   
   // Helpers
-  window.toggleSound = () => { /* basic toggle visual */ document.getElementById('sound-icon').textContent = document.getElementById('sound-icon').textContent === '🔊' ? '🔇' : '🔊'; };
-  function playSound(t) { /* Assume context exists */ }
+  // window.toggleSound defined above
 
 </script>
 </body>
