@@ -40,8 +40,9 @@
 
         /* Minimalist Developer Signature */
         .dev-footer {
-            margin-top: 20px; font-family: 'Fira Code', monospace; 
-            font-size: 0.75rem; color: #b2bec3; opacity: 0.7;
+            margin-top: 25px; font-family: 'Fira Code', monospace; 
+            font-size: 0.75rem; color: #b2bec3; opacity: 0.6;
+            letter-spacing: 1px;
         }
 
         /* Sound Toggle */
@@ -60,15 +61,21 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             padding: var(--pad); overflow-y: auto; transition: opacity 0.3s ease;
             backdrop-filter: blur(5px);
+            pointer-events: auto; /* Ensure clickable */
         }
         .hidden { display: none !important; opacity: 0; pointer-events: none; }
         
+        /* Result Screen - Higher Z-Index to ensure buttons work */
+        #result-screen { z-index: 6000; }
+
         /* Cards */
         .card {
             background: var(--card-bg); padding: 25px; border-radius: 30px;
             box-shadow: var(--shadow); width: 100%; max-width: 550px; text-align: center;
             border: 4px solid var(--white); position: relative;
             max-height: 95vh; overflow-y: auto;
+            /* Ensure card contents are above confetti */
+            z-index: 10;
         }
 
         h1, h2 { font-family: 'Fredoka', sans-serif; color: var(--primary); margin-bottom: 15px; line-height: 1.1; }
@@ -94,6 +101,8 @@
             border: none; border-radius: 20px; font-size: 1.3rem; font-weight: 800;
             margin-top: 20px; cursor: pointer; box-shadow: 0 6px 0 #009476; transition: 0.1s;
             font-family: 'Fredoka', sans-serif;
+            position: relative; /* Ensure z-index works */
+            z-index: 20;
         }
         .big-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #009476; }
         .big-btn.disabled { opacity: 0.6; pointer-events: none; filter: grayscale(1); }
@@ -118,7 +127,6 @@
         }
         .inp-text:focus { border-color: var(--primary); background: #f8f7ff; }
         
-        /* Modern Input for Code */
         #room-join-code {
             font-size: 1.5rem; letter-spacing: 2px; border: 3px solid var(--primary);
             background: #fff; color: var(--primary); width: 140px; padding: 10px;
@@ -195,8 +203,7 @@
             box-shadow: 0 5px 0 var(--light); transition: 0.1s;
         }
         .num-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--light); }
-        .num-btn.del { background: var(--accent); color: white; box-shadow: 0 5px 0 #e17055; font-size: 1.2rem; }
-        .num-btn.pas { background: #fab1a0; color: white; box-shadow: 0 5px 0 #e17055; font-size: 1rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+        .num-btn.del { background: var(--accent); color: white; box-shadow: 0 5px 0 #e17055; font-size: 1.1rem; font-weight: 800; }
         
         /* Reactions */
         .reaction-bar { display: flex; gap: 8px; justify-content: center; margin-top: 15px; }
@@ -430,9 +437,8 @@
         <button class="num-btn" onclick="input(7)">7</button>
         <button class="num-btn" onclick="input(8)">8</button>
         <button class="num-btn" onclick="input(9)">9</button>
-        <button class="num-btn del" onclick="input('del')">⬅</button>
-        <button class="num-btn" onclick="input(0)">0</button>
-        <button class="num-btn pas" id="btn-pas" onclick="passQuestion()">PAS<span style="font-size:0.6rem;">(3)</span></button>
+        <button class="num-btn del" onclick="input('del')">SİL</button>
+        <button class="num-btn" style="grid-column: span 2;" onclick="input(0)">0</button>
     </div>
 
     <div class="reaction-bar hidden" id="reaction-bar">
@@ -519,7 +525,7 @@
       active: false, paused: false, frozen: false,
       score: 0, time: 0, 
       qIndex: 0, currentQ: {}, input: '', 
-      streak: 0, passes: 3,
+      streak: 0,
       shieldActive: false,
       
       // Online
@@ -619,8 +625,10 @@
   };
   
   window.goHome = () => {
-      stopGame();
-      if(state.isOnline) leaveLobby();
+      try {
+          stopGame();
+          if(state.isOnline) leaveLobby();
+      } catch(e) { console.error(e); }
       showScreen('setup-screen');
   };
 
@@ -806,13 +814,15 @@
   };
 
   window.leaveLobby = () => {
-      if (activeRoomListener && state.roomCode) {
-         off(ref(db, 'rooms/' + state.roomCode), 'value', activeRoomListener);
-      }
-      if(state.roomCode) {
-          if(state.role === 'p1') remove(ref(db, 'rooms/' + state.roomCode));
-          else update(ref(db, 'rooms/' + state.roomCode + '/players/p2'), null);
-      }
+      try {
+          if (activeRoomListener && state.roomCode) {
+             off(ref(db, 'rooms/' + state.roomCode), 'value', activeRoomListener);
+          }
+          if(state.roomCode) {
+              if(state.role === 'p1') remove(ref(db, 'rooms/' + state.roomCode));
+              else update(ref(db, 'rooms/' + state.roomCode + '/players/p2'), null);
+          }
+      } catch(e) { console.log("Lobby exit error", e); }
       state.isOnline = false;
       state.active = false;
       goHome();
@@ -830,7 +840,7 @@
   window.startSoloGame = () => {
       state.active = true;
       state.isOnline = false;
-      state.score = 0; state.streak = 0; state.passes = 3; state.qIndex = 0;
+      state.score = 0; state.streak = 0; state.qIndex = 0;
       state.frozen = false; state.shieldActive = false;
       
       if(config.mode === 'count') state.time = 0;
@@ -851,7 +861,7 @@
   function startOnlineGame(duration) {
       if(state.active) return; // Prevent double start
       state.active = true;
-      state.score = 0; state.streak = 0; state.passes = 3; state.frozen = false;
+      state.score = 0; state.streak = 0; state.frozen = false;
       state.time = duration; state.shieldActive = false;
       
       document.getElementById('powerup-bar').classList.remove('hidden');
@@ -1017,16 +1027,6 @@
           else { state.input = ''; updateInput(); ca.classList.add('hidden'); }
       }, 2000);
   }
-
-  window.passQuestion = () => {
-      if(state.passes > 0 && !state.frozen) {
-          state.passes--;
-          document.getElementById('btn-pas').innerHTML = `PAS<span style="font-size:0.6rem;">(${state.passes})</span>`;
-          if(state.isOnline) {
-               if(state.role === 'p1') generateNextOnlineQ();
-          } else { nextQuestion(); }
-      }
-  };
 
   function updateHUD() {
       document.getElementById('my-score').textContent = state.score;
